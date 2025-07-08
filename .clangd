@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+    - -Imodules
+    - -Imodules/mysocket
+    - -Imodules/mysocket/examples
+FallbackFlags: [-Wall, -Wextra, -std=c99]

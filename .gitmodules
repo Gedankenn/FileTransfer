@@ -1,0 +1,3 @@
+[submodule "modules/mysocket"]
+	path = modules/mysocket
+	url = git@github.com:Gedankenn/mysocket.git

@@ -1,0 +1,4 @@
+-Wall -Wextra -std=c99
+-Imodules
+-Imodules/mysocket
+-Imodules/mysocket/examples
