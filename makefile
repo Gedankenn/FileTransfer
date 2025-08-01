@@ -4,7 +4,7 @@ BASE_CFLAGS = -Wall -Wextra -I.
 LIBS = -lcurl
 
 # Header files
-LIB_HDR_FILES = $(wildcard modules/*.h modules/mysocket/*.h)
+LIB_HDR_FILES = $(wildcard modules/*.h modules/mysocket/*.h application/*.h)
 
 # Extrai diretórios únicos dos headers
 LIB_HDR_DIRS := $(sort $(dir $(LIB_HDR_FILES)))
