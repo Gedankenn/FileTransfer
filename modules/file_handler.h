@@ -1,5 +1,5 @@
-#ifndef __FILE_MANAGER_H__ 
-#define __FILE_MANAGER_H__
+#ifndef __FILE_HANDLER_H__ 
+#define __FILE_HANDLER_H__
 
 #include <stdbool.h>
 
@@ -45,4 +45,4 @@ struct file_tree_st
     int folders_count;
 };
 
-#endif //__FILE_MANAGER_H__
+#endif //__FILE_HANDLER_H__

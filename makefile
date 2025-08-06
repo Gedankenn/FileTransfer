@@ -1,50 +1,41 @@
-# Compiler and base flags
-CC = gcc
-BASE_CFLAGS = -Wall -Wextra -I.
-LIBS = -lcurl
+# Compiler and flags
+CC := gcc
+BASE_CFLAGS := -Wall -Wextra
+DEPFLAGS := 
+LDLIBS := -lcurl
 
-# Header files
-LIB_HDR_FILES = $(wildcard modules/*.h modules/mysocket/*.h application/*.h)
+# Output dir
+OUTPUT_DIR := output
 
-# Extrai diretórios únicos dos headers
+# Header files and include flags
+LIB_HDR_FILES := $(wildcard modules/*.h modules/mysocket/*.h application/*.h)
 LIB_HDR_DIRS := $(sort $(dir $(LIB_HDR_FILES)))
-
-# Monta flags -I para os diretórios de headers
 HDR_INCLUDE_FLAGS := $(addprefix -I,$(LIB_HDR_DIRS))
 
-# CFLAGS finais juntando flags base + includes
-CFLAGS = $(BASE_CFLAGS) $(HDR_INCLUDE_FLAGS)
+# Sources
+LIB_SRC_FILES := $(wildcard modules/mysocket/*.c application/*.c modules/*.c)
+APPLICATION_SRC := main.c
+EXAMPLE_SRC := examples/example.c
 
-# Source files
-LIB_SRC_FILES = $(wildcard modules/mysocket/*.c application/*.c modules/*.c)
+APPLICATION_BIN := $(OUTPUT_DIR)/app
+EXAMPLE_BIN := $(OUTPUT_DIR)/example
 
-# Example build
-EXAMPLE_SRC = examples/example.c
-EXAMPLE_BIN = example
+.PHONY: all debug release example clean
 
-# Application build
-APPLICATION_SRC = application/main.c
-APPLICATION_BIN = app
+all: release
 
-# Default target
-all: $(APPLICATION_BIN)
+debug:
+	@mkdir -p $(OUTPUT_DIR)
+	$(CC) $(BASE_CFLAGS) $(HDR_INCLUDE_FLAGS) -g -O0 -DDEBUG $(LIB_SRC_FILES) $(APPLICATION_SRC) -o $(APPLICATION_BIN) $(LDLIBS)
 
-# Build application binary
-$(APPLICATION_BIN): $(APPLICATION_SRC) $(LIB_SRC_FILES)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+release:
+	@mkdir -p $(OUTPUT_DIR)
+	$(CC) $(BASE_CFLAGS) $(HDR_INCLUDE_FLAGS) -O2 $(LIB_SRC_FILES) $(APPLICATION_SRC) -o $(APPLICATION_BIN) $(LDLIBS)
 
-# Build example binary
-example: $(EXAMPLE_BIN)
+example:
+	@mkdir -p $(OUTPUT_DIR)
+	$(CC) $(BASE_CFLAGS) $(HDR_INCLUDE_FLAGS) $(LIB_SRC_FILES) $(EXAMPLE_SRC) -o $(EXAMPLE_BIN) $(LDLIBS)
 
-$(EXAMPLE_BIN): $(EXAMPLE_SRC) $(LIB_SRC_FILES) $(LIB_HDR_FILES)
-	$(CC) $(CFLAGS) -o $@ $^
-
-# Clean up
 clean:
-	rm -f $(EXAMPLE_BIN) $(APPLICATION_BIN)
-
-
-# Clangd
-clangd:
-	./gen_clangd.sh
+	rm -rf $(OUTPUT_DIR)
 
