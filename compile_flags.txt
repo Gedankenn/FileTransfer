@@ -2,3 +2,4 @@
 -Imodules
 -Imodules/mysocket
 -Imodules/mysocket/examples
+-Iapplication/
