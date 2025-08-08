@@ -1,6 +1,7 @@
 #include "file_handler.h"
 #include "msocket.h"
 #include "utils.h"
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -25,8 +26,11 @@ void menu(char *argv[])
         printf("Enter file path: ");
         char file_path[FILE_PATH_SIZE];
         fgets(file_path, FILE_PATH_SIZE, stdin);
+        int len = strlen(file_path);
+        file_path[len-1] = '\0';
+        struct file_st file;
+        read_dir(file_path, &file);
     }
-
 }
 
 int main(int argc, char *argv[])
@@ -41,7 +45,7 @@ int main(int argc, char *argv[])
     }
     printf("My ip: %s\n", ip);
 
-    if (argc < 3)
+    if (argc < 2)
     {
         printf("Usage: app < -s/-c> <port>\n");
         return EXIT_SUCCESS;

@@ -39,10 +39,12 @@ struct file_st
 
 struct file_tree_st
 {
-    struct file_st root;
+    struct file_st* root;
     int total_size;
     int files_count;
     int folders_count;
 };
+
+int read_dir(char *path, struct file_st* file);
 
 #endif //__FILE_HANDLER_H__
