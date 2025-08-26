@@ -39,3 +39,5 @@ example:
 clean:
 	rm -rf $(OUTPUT_DIR)
 
+testfile:
+	@./output/app -f

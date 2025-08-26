@@ -28,7 +28,7 @@ void menu(char *argv[])
         fgets(file_path, FILE_PATH_SIZE, stdin);
         int len = strlen(file_path);
         file_path[len-1] = '\0';
-        struct file_st file;
+        struct file_tree_st file;
         read_dir(file_path, &file);
     }
 }
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        printf("Usage: app < -s/-c> <port>\n");
+        printf("Usage: app <-s/-c/-f> <port>\n");
         return EXIT_SUCCESS;
     }
     printf("option: %s, port %s\n", argv[1], argv[2]);

@@ -11,7 +11,7 @@
 #endif
 
 #define FILE_PATH_SIZE 1024
-#define FILE_NAME_SIZE 128
+#define FILE_NAME_SIZE 256
 
 enum
 {
@@ -45,6 +45,6 @@ struct file_tree_st
     int folders_count;
 };
 
-int read_dir(char *path, struct file_st* file);
+int read_dir(char *path, struct file_tree_st* root);
 
 #endif //__FILE_HANDLER_H__
