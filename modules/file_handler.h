@@ -28,13 +28,14 @@ typedef enum
 
 struct file_st
 {
-    char name[FILE_NAME_SIZE];
-    char path[FILE_PATH_SIZE];
-    int size;
-    file_type_e type;
     struct file_st *parent;
     struct file_st *childrem;
     struct file_st *brother;
+    file_type_e type;
+    char name[FILE_NAME_SIZE];
+    char path[FILE_PATH_SIZE];
+    int depth;
+    int size;
 };
 
 struct file_tree_st

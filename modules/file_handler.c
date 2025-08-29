@@ -12,12 +12,13 @@ void init_file_node(struct file_st *f)
     f->brother = NULL;
     f->size = 0;
 }
-void print_files(struct file_st *f, int depth)
+void print_files(struct file_st *f)
 {
     if (f == NULL)
         return;
 
     // Print indentation
+    int depth = f->depth;
     for (int i = 0; i < depth; i++) {
         printf("  ");
     }
@@ -26,12 +27,12 @@ void print_files(struct file_st *f, int depth)
 
     // First: recurse into children
     if (f->childrem) {
-        print_files(f->childrem, depth + 1);
+        print_files(f->childrem);
     }
 
     // Then: move to next brother
     if (f->brother) {
-        print_files(f->brother, depth);
+        print_files(f->brother);
     }
 	return;
 }
@@ -44,7 +45,7 @@ void print_file_tree(struct file_tree_st *root)
     printf("Total File count: %d\n", root->files_count);
     printf("Total folder count: %d\n", root->folders_count);
 
-    print_files(root->root, 0);
+    print_files(root->root);
 }
 
 void scan_dir(const char *path, int depth, struct file_st *file, struct file_tree_st *root)
@@ -83,23 +84,40 @@ void scan_dir(const char *path, int depth, struct file_st *file, struct file_tre
         snprintf(q->path, FILE_PATH_SIZE, "%s", fullpath);
         snprintf(q->name, FILE_NAME_SIZE, "%s", entry->d_name);
 
-        // If it's a directory, recurse
+
         struct stat statbuf;
-        if (stat(fullpath, &statbuf) == 0 && S_ISDIR(statbuf.st_mode))
+        if( stat(fullpath, &statbuf) != 0)
         {
-            q->type = DIRECTORY_E;
+            continue;
+        }
+        q->type = FILE_E;
+        q->depth = depth;
+        q->parent = file;
+        root->files_count++;
+        root->total_size += statbuf.st_size;
+
+        // attach q as child of file
+        if (file->childrem == NULL)
+        {
             file->childrem = q;
-			q->parent = file;
-            root->folders_count++;
+        }
+        else
+        {
+            struct file_st *tmp = file->childrem;
+            while (tmp->brother != NULL) {
+                tmp = tmp->brother;
+            }
+            tmp->brother = q;
+        }
+
+        // If it's a directory, recurse
+        if (S_ISDIR(statbuf.st_mode))
+        {
             scan_dir(fullpath, depth + 1, q, root);
         }
         else
         {
-            q->type = FILE_E;
-            file->brother = q;
-            root->files_count++;
-            root->total_size = root->total_size + statbuf.st_size;
-			file = q;
+            file = q;
         }
     }
 
@@ -125,6 +143,7 @@ int read_dir(char *path, struct file_tree_st* root)
     root->root->type = DIRECTORY_E;
     snprintf(root->root->path, FILE_PATH_SIZE, "%s", path);
     snprintf(root->root->name, FILE_NAME_SIZE, "%s", path);
+    init_file_node(root->root);
     scan_dir(path, 0, root->root, root);
     
 #ifdef DEBUG
