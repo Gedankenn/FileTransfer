@@ -24,12 +24,8 @@ void menu(char *argv[])
     {
         printf("Listing files in dir\n");
         printf("Enter file path: ");
-        char file_path[FILE_PATH_SIZE];
-        fgets(file_path, FILE_PATH_SIZE, stdin);
-        int len = strlen(file_path);
-        file_path[len-1] = '\0';
         struct file_tree_st file;
-        read_dir(file_path, &file);
+        read_dir(argv[2], &file);
     }
 }
 
