@@ -124,16 +124,31 @@ void scan_dir(const char *path, int depth, struct file_st *file, struct file_tre
     closedir(dp);
 }
 
+void get_file_name_from_path(char* path, char* file_name)
+{
+    char c;
+    c = path[0];
+    int pos = 0;
+    int p_pos = 0;
+    while (c != '\0')
+    {
+        if (c == '/')
+        {
+            pos = 0;
+        }
+        else 
+        {
+            file_name[pos++] = c;
+        }
+        c = path[p_pos++];
+    }
+    file_name[pos] = '\0';
+}
+
 int read_dir(char *path, struct file_tree_st* root)
 {
-    char full_path[FILE_PATH_SIZE];
-    getcwd(full_path, FILE_PATH_SIZE);
-#ifdef DEBUG
-    printf("--------------- Debug ------------------\n");
-    printf("cwd: %s\n",full_path);
-    printf("Contents of directory: %s\n", path);
-    printf("----------------------------------------\n");
-#endif
+    char file_name[FILE_NAME_SIZE];
+
 
     root->total_size = 0;
     root->files_count = 0;
@@ -141,11 +156,20 @@ int read_dir(char *path, struct file_tree_st* root)
     root->root = malloc(sizeof(struct file_st));
     init_file_node(root->root);
     root->root->type = DIRECTORY_E;
+    get_file_name_from_path(path, file_name);
+
+#ifdef DEBUG
+    printf("--------------- Debug ------------------\n");
+    printf("cwd: %s\n",full_path);
+    printf("Contents of directory: %s\n", file_name);
+    printf("----------------------------------------\n");
+#endif
+
     snprintf(root->root->path, FILE_PATH_SIZE, "%s", path);
-    snprintf(root->root->name, FILE_NAME_SIZE, "%s", path);
+    snprintf(root->root->name, FILE_NAME_SIZE, "%s", file_name);
     init_file_node(root->root);
     scan_dir(path, 0, root->root, root);
-    
+
 #ifdef DEBUG
     print_file_tree(root);
 #endif

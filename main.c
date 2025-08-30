@@ -23,7 +23,6 @@ void menu(char *argv[])
     if (strcmp(argv[1], "-f") == 0)
     {
         printf("Listing files in dir\n");
-        printf("Enter file path: ");
         struct file_tree_st file;
         read_dir(argv[2], &file);
     }
@@ -43,10 +42,11 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        printf("Usage: app <-s/-c/-f> <port>\n");
+        printf("Server: ./app -s <port> <file path>\n");
+        printf("Client: ./app -c <port> <file path>\n");
+        printf("File testing: ./app -f <file path>\n");
         return EXIT_SUCCESS;
     }
-    printf("option: %s, port %s\n", argv[1], argv[2]);
     menu(argv);
 
     return EXIT_SUCCESS;
