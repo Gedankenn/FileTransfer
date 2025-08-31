@@ -48,3 +48,14 @@ testfile:
 	@mkdir -p $(OUTPUT_DIR)
 	$(CC) $(BASE_CFLAGS) $(HDR_INCLUDE_FLAGS) -g -O0 -DDEBUG $(LIB_SRC_FILES) $(APPLICATION_SRC) -o $(APPLICATION_BIN) $(LDLIBS)
 	@./output/app -f /home/sabo/github/file_transfer_c/
+
+help:
+	@echo "Available make targets:"
+	@echo "  all       - Build release (default)"
+	@echo "  debug     - Build with debug flags"
+	@echo "  release   - Build optimized release"
+	@echo "  example   - Build example binary"
+	@echo "  clean     - Remove build output"
+	@echo "  testapp   - Build + run in test mode (directory transfer)"
+	@echo "  testfile  - Build + run in debug mode (single file transfer)"
+	@echo "  help      - Show this help message"
