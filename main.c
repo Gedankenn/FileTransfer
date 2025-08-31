@@ -7,18 +7,19 @@
 #include <sys/socket.h>
 #include "server.h"
 #include "client.h"
+#include <string.h>
 
 void menu(char *argv[])
 {
     if (strcmp(argv[1], "-s") == 0)
     {
         printf("Entering server mode\n");
-        server(argv[2], BUF);
+        server(argv[2], argv[3], BUF);
     }
     else if (strcmp(argv[1], "-c") == 0)
     {
         printf("Entering client mode\n");
-        client(argv[2], BUF);
+        client(argv[2], argv[3], BUF);
     }
     else if (strcmp(argv[1], "-f") == 0)
     {
@@ -51,9 +52,38 @@ int main(int argc, char *argv[])
         printf("Server: ./app -s <port> <file path>\n");
         printf("Client: ./app -c <port> <file path>\n");
         printf("File testing: ./app -f <file path>\n");
+        printf("App autotest: ./app -t\n");
         return EXIT_SUCCESS;
     }
     menu(argv);
 
     return EXIT_SUCCESS;
 }
+
+
+/**
+┌──────┐                                ┌──────┐
+│SERVER│                                │CLIENT│
+└──┬───┘                                └──┬───┘
+   │             Request File              │    
+   │ ◄─────────────────────────────────────┤    
+   │                                       │    
+   │           MetaDados  Geral            │    
+   ├─────────────────────────────────────► │    
+   │                                       │    
+   │                  ACK                  │    
+   │ ◄─────────────────────────────────────┤    
+   │                                       │    
+   │         File/Folder MetaDados         │    
+   ├─────────────────────────────────────► │    
+   │                                       │    
+   │           File/Folder Dados           │    
+   ├─────────────────────────────────────► │    
+   │                                       │    
+   │                 ACK                   │    
+   │ ◄─────────────────────────────────────┤    
+   │                                       │    
+   │                 END                   │    
+   ├─────────────────────────────────────► │    
+   ▼                                       ▼    
+ */

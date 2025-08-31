@@ -1,19 +1,33 @@
 #include "server.h"
+#include "file_handler.h"
+#include "msocket.h"
+#include <stdio.h>
+#include "file_transfer_fsm.h"
 
-
-void server(char *port, int buf_size)
+int server(char* host, char *port, int buf_size)
 {
-  char buf[buf_size];
-  char data[buf_size];
-  int nread = 0;
-  int sfd = 0;
-  init_socket(buf_size, AF_UNSPEC, 0);
-  sfd = create_socket(port);
-  printf("Server created\n");
-  do {
-    memset(data, 0, buf_size);
-    nread = socket_read(sfd, buf);
-    memcpy(data, buf, nread);
-    printf("read: %s\n", data);
-  } while (strncmp(data, EXIT, nread) != 0 && strlen(data) != 0);
+    int sfd = 0;
+    int fsm = 0;
+    int ret = 0;
+#ifdef DEBUG
+    printf("--------------- Initialized server side ------------------\n");
+    printf("Host: %s:%s",host,port);
+    printf("----------------------------------------------------------\n");
+#endif
+    init_socket(buf_size, AF_UNSPEC, 0);
+    sfd = create_socket(port);
+    if(sfd < 0)
+    {
+        printf("Error connecting to socket\n");
+        return 1;
+    }
+    
+    unsigned char buf[buf_size];
+
+    while(ret != 0)
+    {
+        ret = serverFSM(sfd, buf, &fsm);
+    }
+
+    return SUCCESS;
 }

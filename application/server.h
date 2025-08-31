@@ -3,7 +3,7 @@
 
 #include <msocket.h>
 
-void server(char *port, int buf_size);
+int server(char* host, char *port, int buf_size);
 
 
 #endif // __SERVER_H__
