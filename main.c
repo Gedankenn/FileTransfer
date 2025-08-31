@@ -15,14 +15,20 @@ void menu(char *argv[])
         printf("Entering server mode\n");
         server(argv[2], BUF);
     }
-    if (strcmp(argv[1], "-c") == 0)
+    else if (strcmp(argv[1], "-c") == 0)
     {
         printf("Entering client mode\n");
         client(argv[2], BUF);
     }
-    if (strcmp(argv[1], "-f") == 0)
+    else if (strcmp(argv[1], "-f") == 0)
     {
         printf("Listing files in dir\n");
+        struct file_tree_st file;
+        read_dir(argv[2], &file);
+    }
+    else if (strcmp(argv[1], "-t") == 0)
+    {
+        printf("Auto Teste\n");
         struct file_tree_st file;
         read_dir(argv[2], &file);
     }

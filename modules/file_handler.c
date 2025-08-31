@@ -20,10 +20,10 @@ void print_files(struct file_st *f)
     // Print indentation
     int depth = f->depth;
     for (int i = 0; i < depth; i++) {
-        printf("  ");
+        printf("   ");
     }
 
-    printf("|-- %s\n", f->name);
+    printf("|--- %s\n", f->name);
 
     // First: recurse into children
     if (f->childrem) {
@@ -81,7 +81,7 @@ void print_file_tree(struct file_tree_st *root)
     print_files(root->root);
 }
 
-void scan_dir(const char *path, int depth, struct file_st *file, struct file_tree_st *root)
+int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree_st *root)
 {
     struct dirent *entry;
     DIR *dp = opendir(path);
@@ -89,7 +89,7 @@ void scan_dir(const char *path, int depth, struct file_st *file, struct file_tre
     if (dp == NULL) 
     {
         perror("opendir");
-        return;
+        return ERROR;
     }
 
     while ((entry = readdir(dp)))
@@ -104,9 +104,9 @@ void scan_dir(const char *path, int depth, struct file_st *file, struct file_tre
         // Indentation for hierarchy
         for (int i = 0; i < depth; i++)
         {
-            printf("  ");
+            printf("    ");
         }
-        printf("|-- %s\n", entry->d_name);
+        printf("|---- %s\n", entry->d_name);
         #endif
         // Build new path
 		struct file_st *q;
@@ -151,11 +151,13 @@ void scan_dir(const char *path, int depth, struct file_st *file, struct file_tre
         else
         {
             root->files_count++;
+            q->size = statbuf.st_size;
             file = q;
         }
     }
 
     closedir(dp);
+    return SUCCESS;
 }
 
 void get_file_name_from_path(char* path, char* file_name)
@@ -180,9 +182,32 @@ void get_file_name_from_path(char* path, char* file_name)
     file_name[pos] = '\0';
 }
 
+int get_file_bin(struct file_st* file, unsigned char* bin_file)
+{
+    FILE*  fp;
+    size_t read_count = 0;
+
+    fp = fopen(file->path,"rb");
+    if (fp == NULL)
+    {
+        perror("Error opening file\n");
+        return ERROR;
+    }
+    
+    bin_file = (unsigned char*)malloc(file->size);
+    read_count = fread(bin_file,1,file->size, fp);
+    if(read_count != file->size)
+    {
+        perror("Error reading file\n");
+        return ERROR;
+    }
+    return SUCCESS;
+}
+
 int read_dir(char *path, struct file_tree_st* root)
 {
     char file_name[FILE_NAME_SIZE];
+    int ret = 0;
 
 
     root->total_size = 0;
@@ -203,10 +228,10 @@ int read_dir(char *path, struct file_tree_st* root)
     snprintf(root->root->path, FILE_PATH_SIZE, "%s", path);
     snprintf(root->root->name, FILE_NAME_SIZE, "%s", file_name);
     init_file_node(root->root);
-    scan_dir(path, 0, root->root, root);
+    ret = scan_dir(path, 1, root->root, root);
 
 #ifdef DEBUG
     print_file_tree(root);
 #endif
-    return SUCCESS;
+    return ret;
 }
