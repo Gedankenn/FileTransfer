@@ -37,11 +37,44 @@ void print_files(struct file_st *f)
 	return;
 }
 
+void print_total_size(int size)
+{
+    int mul = 0;
+    int aux_size = size;
+    int ret = 0;
+    while(aux_size > 0)
+    {
+        ret = aux_size;
+        aux_size = aux_size / 1024;
+        mul++;
+    }
+    mul -=1;
+    printf("Total Size: ");
+    switch (mul)
+    {
+        case 0:
+            printf("%d b\n",ret);
+            break;
+        case 1:
+            printf("%d kb\n",ret);
+            break;
+        case 2:
+            printf("%d mb\n",ret);
+            break;
+        case 3:
+            printf("%d Gb\n",ret);
+            break;
+        case 4:
+            printf("%d Pb\n",ret);
+            break;
+    }
+}
+
 void print_file_tree(struct file_tree_st *root)
 {
     printf("------------- Print file tree for -------------\n");
     printf("Path: %s\n", root->root->path);
-    printf("Total Size: %d mb\n", (root->total_size / 1024) / 1024);
+    print_total_size(root->total_size);
     printf("Total File count: %d\n", root->files_count);
     printf("Total folder count: %d\n", root->folders_count);
 
@@ -93,7 +126,6 @@ void scan_dir(const char *path, int depth, struct file_st *file, struct file_tre
         q->type = FILE_E;
         q->depth = depth;
         q->parent = file;
-        root->files_count++;
         root->total_size += statbuf.st_size;
 
         // attach q as child of file
@@ -113,10 +145,12 @@ void scan_dir(const char *path, int depth, struct file_st *file, struct file_tre
         // If it's a directory, recurse
         if (S_ISDIR(statbuf.st_mode))
         {
+            root->folders_count++;
             scan_dir(fullpath, depth + 1, q, root);
         }
         else
         {
+            root->files_count++;
             file = q;
         }
     }
@@ -160,7 +194,7 @@ int read_dir(char *path, struct file_tree_st* root)
 
 #ifdef DEBUG
     printf("--------------- Debug ------------------\n");
-    printf("cwd: %s\n",full_path);
+    printf("cwd: %s\n", path);
     printf("Contents of directory: %s\n", file_name);
     printf("----------------------------------------\n");
 #endif

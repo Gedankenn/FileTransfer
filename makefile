@@ -42,4 +42,4 @@ clean:
 testfile:
 	@mkdir -p $(OUTPUT_DIR)
 	$(CC) $(BASE_CFLAGS) $(HDR_INCLUDE_FLAGS) -g -O0 -DDEBUG $(LIB_SRC_FILES) $(APPLICATION_SRC) -o $(APPLICATION_BIN) $(LDLIBS)
-	@./output/app -f .
+	@./output/app -f /home/sabo/github/file_transfer_c/
