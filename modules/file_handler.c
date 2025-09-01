@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "file_handler.h"
+#include <sys/stat.h>
 #include <unistd.h>
 
 void init_file_node(struct file_st *f)
@@ -202,6 +203,20 @@ int get_file_bin(struct file_st* file, unsigned char* bin_file)
         return ERROR;
     }
     return SUCCESS;
+}
+
+bool folderExist(char* path)
+{
+	struct stat info;
+	if(stat(path, &info) != 0)
+	{
+		return 0;
+	}
+	if(S_ISDIR(info.st_mode))
+	{
+		return 1;
+	}
+	return 0;
 }
 
 int read_dir(char *path, struct file_tree_st* root)
