@@ -6,6 +6,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef _WIN32
+    #include <direct.h>
+    #define MKDIR(path) _mkdir(path)
+#else
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #define MKDIR(path) mkdir(path, 0777)
+#endif
+
 void init_file_node(struct file_st *f)
 {
     f->parent = NULL;
@@ -217,6 +226,19 @@ bool folderExist(char* path)
 		return 1;
 	}
 	return 0;
+}
+
+bool create_dir(char* path)
+{
+    if(!folderExist(path))
+    {
+        if (MKDIR(path) == -1)
+        {
+            perror("Failed to create folder\n");
+            return false;
+        }
+    }
+    return true;
 }
 
 int read_dir(char *path, struct file_tree_st* root)

@@ -48,5 +48,6 @@ struct file_tree_st
 
 int read_dir(char *path, struct file_tree_st* root);
 int get_file_bin(struct file_st* file, unsigned char* bin_file);
+bool create_dir(char* path);
 
 #endif //__FILE_HANDLER_H__

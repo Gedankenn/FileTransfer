@@ -1,0 +1,4 @@
+#ifndef __FILE_TRANSFER_PROTOCOL__
+#define __FILE_TRANSFER_PROTOCOL__
+
+#endif
