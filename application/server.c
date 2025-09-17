@@ -1,14 +1,14 @@
 #include "server.h"
 #include "file_handler.h"
+#include "file_transfer_protocol.h"
 #include "msocket.h"
 #include <stdio.h>
-#include "file_transfer_fsm.h"
 
-int server(char* host, char *port, int buf_size)
+int server(char *port, int buf_size, char* path)
 {
-    int sfd = 0;
-    int fsm = 0;
+    int sfd;
     int ret = 0;
+
 #ifdef DEBUG
     printf("--------------- Initialized server side ------------------\n");
     printf("Host: %s:%s",host,port);
@@ -22,11 +22,23 @@ int server(char* host, char *port, int buf_size)
         return 1;
     }
     
-    unsigned char buf[buf_size];
+    unsigned char* buf = NULL;
+    struct file_tree_st root;
+    struct file_st* pfile = NULL;
 
-    while(ret != 0)
+    ret = read_dir(path, &root);
+    if (ret < 0)
     {
-        ret = serverFSM(sfd, buf, &fsm);
+        return ret;
+    }
+
+    pfile = root.root;
+    int data_sent = 0;
+    while(data_sent < root.total_size)
+    {
+        ret = get_file_bin(pfile, buf);
+        ret = transfer_data(sfd, buf, pfile->size);
+
     }
 
     return SUCCESS;

@@ -16,8 +16,8 @@
 enum
 {
     SUCCESS = 0,
-    ERROR = 1,
-    NO_FILE_FOUND = 2,
+    ERROR = -1,
+    NO_FILE_FOUND = -2,
 };
 
 typedef enum
@@ -49,5 +49,6 @@ struct file_tree_st
 int read_dir(char *path, struct file_tree_st* root);
 int get_file_bin(struct file_st* file, unsigned char* bin_file);
 bool create_dir(char* path);
+bool create_file(char* path);
 
 #endif //__FILE_HANDLER_H__

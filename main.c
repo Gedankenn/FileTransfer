@@ -14,7 +14,7 @@ void menu(char *argv[])
     if (strcmp(argv[1], "-s") == 0)
     {
         printf("Entering server mode\n");
-        server(argv[2], argv[3], BUF);
+        server(argv[3], BUF, argv[4]);
     }
     else if (strcmp(argv[1], "-c") == 0)
     {

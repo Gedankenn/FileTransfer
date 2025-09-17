@@ -195,7 +195,7 @@ void get_file_name_from_path(char* path, char* file_name)
 int get_file_bin(struct file_st* file, unsigned char* bin_file)
 {
     FILE*  fp;
-    size_t read_count = 0;
+    int read_count = 0;
 
     fp = fopen(file->path,"rb");
     if (fp == NULL)
@@ -228,6 +228,20 @@ bool folderExist(char* path)
 	return 0;
 }
 
+bool fileExist(char* path)
+{
+	struct stat info;
+	if(stat(path, &info) != 0)
+	{
+		return 0;
+	}
+	if(!S_ISDIR(info.st_mode))
+	{
+		return 1;
+	}
+	return 0;
+}
+
 bool create_dir(char* path)
 {
     if(!folderExist(path))
@@ -235,6 +249,20 @@ bool create_dir(char* path)
         if (MKDIR(path) == -1)
         {
             perror("Failed to create folder\n");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool create_file(char* path)
+{
+    FILE* fp;
+    if (!fileExist(path))
+    {
+        fp = fopen(path, "w");
+        if( fp == NULL)
+        {
             return false;
         }
     }
