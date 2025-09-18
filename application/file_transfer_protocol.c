@@ -16,7 +16,6 @@ int receive_data_part(int sfd, char* buf)
     return nread;
 }
 
-
 int receive_data(int sfd, char* data)
 {
     int nread = 0;
@@ -75,7 +74,7 @@ int transfer_data(int sfd, unsigned char* data, int data_size)
             nwrite = socket_write(sfd, data+data_sent, BUF);
         }
         else 
-    {
+        {
             socket_write(sfd, data+data_sent, remain);
         }
         if (nwrite < 0)

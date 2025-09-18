@@ -38,6 +38,11 @@ int server(char *port, int buf_size, char* path)
     {
         ret = get_file_bin(pfile, buf);
         ret = transfer_data(sfd, buf, pfile->size);
+        if (ret < 0)
+        {
+            return ERROR;
+        }
+        data_sent += ret;
 
     }
 
