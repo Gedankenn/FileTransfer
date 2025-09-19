@@ -82,13 +82,16 @@ void print_total_size(int size)
 
 void print_file_tree(struct file_tree_st *root)
 {
-    printf("------------- Print file tree for -------------\n");
+    printf("------------------ Print file tree  -----------------\n");
+    printf("---------- File MetaData ----------\n");
     printf("Path: %s\n", root->root->path);
     print_total_size(root->total_size);
     printf("Total File count: %d\n", root->files_count);
     printf("Total folder count: %d\n", root->folders_count);
+    printf("-----------------------------------\n");
 
     print_files(root->root);
+    printf("-----------------------------------------------------\n");
 }
 
 int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree_st *root)
