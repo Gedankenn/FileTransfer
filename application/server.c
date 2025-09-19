@@ -11,7 +11,7 @@ int server(char *port, int buf_size, char* path)
 
 #ifdef DEBUG
     printf("--------------- Initialized server side ------------------\n");
-    printf("Host: %s:%s",host,port);
+    printf("Host: %s",port);
     printf("----------------------------------------------------------\n");
 #endif
     init_socket(buf_size, AF_UNSPEC, 0);

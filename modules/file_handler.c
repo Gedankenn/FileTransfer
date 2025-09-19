@@ -177,7 +177,7 @@ void get_file_name_from_path(char* path, char* file_name)
     int pos = 0;
     int p_pos = 0;
     int len = strlen(path);
-    while (p_pos < len)
+    while (p_pos <= len)
     {
         if (c == '/')
         {
