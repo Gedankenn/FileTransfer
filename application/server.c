@@ -11,8 +11,10 @@ int client_connected(int sfd, unsigned char* buf)
     int ret = 0;
     if (buf == NULL)
     {
+        printf("Buff is a null pointer\n");
         return ERROR;
     }
+    printf("Waiting for client to connect\n");
     ret = socket_read(sfd, buf);
     if (ret > 0)
     {
@@ -22,6 +24,7 @@ int client_connected(int sfd, unsigned char* buf)
             return SUCCESS;
         }
     }
+    printf("Client not connected\n");
     return ERROR;
 
 }
@@ -44,7 +47,8 @@ int server(char *port, int buf_size, char* path)
         return 1;
     }
     
-    unsigned char* buf = NULL;
+    unsigned char* databuf = NULL;
+    unsigned char clientbuf[buf_size];
     struct file_tree_st root;
     struct file_st* pfile = NULL;
 
@@ -55,7 +59,7 @@ int server(char *port, int buf_size, char* path)
     }
 
     // Wait for the client to connect 
-    ret = client_connected(sfd, buf);
+    ret = client_connected(sfd, clientbuf);
     if (ret != SUCCESS)
     {
         return ERROR;
@@ -67,15 +71,17 @@ int server(char *port, int buf_size, char* path)
     {
         if (pfile->type == FILE_E)
         {
-            ret = get_file_bin(pfile, buf);
+            ret = get_file_bin(pfile, databuf);
             if (ret != 0)
             {
+                printf("Error getting the file binary\n");
                 return ERROR;
             }
         }
-        ret = transfer_data(sfd, buf, pfile->size);
+        ret = transfer_data(sfd, databuf, pfile->size);
         if (ret < 0)
         {
+            printf("Error sending the data\n");
             return ERROR;
         }
         data_sent += ret;

@@ -22,15 +22,24 @@ void menu_helper(void)
 
 void menu(char *argv[])
 {
+    int ret = 0;
     if (strcmp(argv[1], "-s") == 0)
     {
         printf("Entering server mode\n");
-        server(argv[2], BUF, argv[3]);
+        ret = server(argv[2], BUF, argv[3]);
+        if (ret == ERROR)
+        {
+            printf("Deu ruim \n");
+        }
     }
     else if (strcmp(argv[1], "-c") == 0)
     {
         printf("Entering client mode\n");
-        client(argv[2], argv[3], BUF);
+        ret = client(argv[2], argv[3], BUF);
+        if (ret == ERROR)
+        {
+            printf("Deu ruim \n");
+        }
     }
     else if (strcmp(argv[1], "-f") == 0)
     {
