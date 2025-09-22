@@ -9,6 +9,17 @@
 #include "client.h"
 #include <string.h>
 
+void menu_helper(void)
+{
+    printf("---------------- HELPER MENU -------------------\n");
+    printf("Server: ./app -s <port> <file path>\n");
+    printf("Client: ./app -c <host> <port> <dest path>\n");
+    printf("File testing: ./app -f <file path>\n");
+    printf("App autotest: ./app -t\n");
+    printf("------------------------------------------------\n");
+
+}
+
 void menu(char *argv[])
 {
     if (strcmp(argv[1], "-s") == 0)
@@ -49,10 +60,7 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        printf("Server: ./app -s <port> <file path>\n");
-        printf("Client: ./app -c <port> <file path>\n");
-        printf("File testing: ./app -f <file path>\n");
-        printf("App autotest: ./app -t\n");
+        menu_helper();
         return EXIT_SUCCESS;
     }
     menu(argv);
