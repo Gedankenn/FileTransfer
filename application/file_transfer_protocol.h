@@ -1,6 +1,7 @@
 #ifndef __FILE_TRANSFER_PROTOCOL__
 #define __FILE_TRANSFER_PROTOCOL__
 
+#define HELLO_MESSAGE "O Pai Ta On"
 
 enum file_transfer_errors
 {

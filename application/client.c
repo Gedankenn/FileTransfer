@@ -26,19 +26,22 @@ int client(char* host, char* port, int buf_size)
     if(sfd < 0)
     {
         printf("Error connecting to socket\n");
-        return 1;
+        return ERROR;
     }
 
 	// ------------------ Connection states 
 	// First, connect to the server 
-	snprintf(buf, buf_size, "O PAI TA ON");
+    printf("Sending the hello message to the server\n");
+	snprintf(buf, buf_size, HELLO_MESSAGE);
 	socket_write(sfd, buf, strlen(buf));
 
 	// Wait for root file metadata
+    printf("Waiting for root file metadata\n");
 	nread = socket_read(sfd,buf);
 	if(nread < 0)
 	{
-		return 1;
+        printf("Didnt received answer from the server\n");
+	    return ERROR;
 	}
 	memcpy(&root, buf, sizeof(struct file_tree_st));
 

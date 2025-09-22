@@ -9,6 +9,7 @@
 int client_connected(int sfd, unsigned char* buf)
 {
     int ret = 0;
+    int cmp = 0;
     if (buf == NULL)
     {
         printf("Buff is a null pointer\n");
@@ -19,7 +20,11 @@ int client_connected(int sfd, unsigned char* buf)
     if (ret > 0)
     {
         buf[ret] = '\0';
-        if (strcmp((const char *)buf, "O Pai ta On") == 0)
+        cmp = strcmp((const char *)buf, HELLO_MESSAGE);
+        #ifdef DEBUG
+        printf("cmp: %d\n",cmp);
+        #endif
+        if (cmp == 0)
         {
             return SUCCESS;
         }
@@ -65,6 +70,15 @@ int server(char *port, int buf_size, char* path)
         return ERROR;
     }
 
+    printf("Send root file metadata\n");
+    ret = socket_write(sfd, &root, sizeof(struct file_tree_st));
+    if (ret < 0)
+    {
+        printf("Error sending root file metadata\n");
+        return ERROR;
+    }
+
+    printf("Start sending data\n");
     pfile = root.root;
     int data_sent = 0;
     while(data_sent < root.total_size)
