@@ -29,12 +29,6 @@ int client(char* host, char* port, int buf_size)
         return ERROR;
     }
 
-	// ------------------ Connection states 
-	// First, connect to the server 
-    printf("Sending the hello message to the server\n");
-	snprintf(buf, buf_size, HELLO_MESSAGE);
-	socket_write(sfd, buf, strlen(buf));
-
 	// Wait for root file metadata
     printf("Waiting for root file metadata\n");
 	nread = socket_read(sfd,buf);
@@ -45,13 +39,11 @@ int client(char* host, char* port, int buf_size)
 	}
 	memcpy(&root, buf, sizeof(struct file_tree_st));
 
-#ifdef DEBUG
     printf("--------------- received root metadata -------------------\n");
     printf("Path: %s\n", root.root->path);
     printf("Size: %d\n", root.total_size);
     printf("Count: %d\n", root.files_count);
     printf("----------------------------------------------------------\n");
-#endif
 
 	int received_data_size = 0;
 	while(received_data_size < root.total_size)
