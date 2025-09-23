@@ -4,11 +4,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-int receive_data_part(int sfd, char* buf)
+int receive_data_part(int sfd, char* buf, int buf_size)
 {
     int nread = 0;
 
-    nread = socket_read(sfd, buf);
+    nread = socket_read(sfd, buf, buf_size);
     if (nread < 0)
     {
         return CANT_CONNECT;
@@ -16,13 +16,13 @@ int receive_data_part(int sfd, char* buf)
     return nread;
 }
 
-int receive_data(int sfd, char* data)
+int receive_data(int sfd, char* data, int buf_size)
 {
     int nread = 0;
     struct file_st file;
     char buf[BUF];
     //first receive the data metada
-    nread = socket_read(sfd, buf);
+    nread = socket_read(sfd, buf, buf_size);
     if (nread < 0)
     {
         return CANT_CONNECT;
@@ -41,7 +41,7 @@ int receive_data(int sfd, char* data)
     data = malloc(file.size);
     while (data_received < file.size)
     {
-        nread = receive_data_part(sfd, buf);
+        nread = receive_data_part(sfd, buf, buf_size);
         if(nread < 0)
         {
             return CANT_CONNECT;

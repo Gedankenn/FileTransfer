@@ -21,7 +21,6 @@ int client(char* host, char* port, int buf_size)
     printf("Host: %s:%s",host,port);
     printf("----------------------------------------------------------\n");
 #endif
-    init_socket(buf_size, AF_UNSPEC, 0);
     sfd = connect_socket(host, port);
     if(sfd < 0)
     {
@@ -31,24 +30,24 @@ int client(char* host, char* port, int buf_size)
 
 	// Wait for root file metadata
     printf("Waiting for root file metadata\n");
-	nread = socket_read(sfd,buf);
+	nread = socket_read(sfd, buf, buf_size);
 	if(nread < 0)
 	{
-        printf("Didnt received answer from the server\n");
+        printf("Didnt received the root file metadata from the server\n");
 	    return ERROR;
 	}
 	memcpy(&root, buf, sizeof(struct file_tree_st));
 
     printf("--------------- received root metadata -------------------\n");
-    printf("Path: %s\n", root.root->path);
-    printf("Size: %d\n", root.total_size);
-    printf("Count: %d\n", root.files_count);
+    print_total_size(root.total_size);
+    printf("Files count: %d\n", root.files_count);
+    printf("Folders count: %d\n", root.folders_count);
     printf("----------------------------------------------------------\n");
 
 	int received_data_size = 0;
 	while(received_data_size < root.total_size)
 	{
-        nread = receive_data(sfd, buf);
+        nread = receive_data(sfd, buf, buf_size);
         if (nread < 0)
         {
             return ERROR;

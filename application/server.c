@@ -15,7 +15,6 @@ int server(char *port, int buf_size, char* path)
     printf("Host: %s",port);
     printf("----------------------------------------------------------\n");
 #endif
-    init_socket(buf_size, AF_UNSPEC, 0);
     sfd = create_socket(port);
     if(sfd < 0)
     {
@@ -33,6 +32,8 @@ int server(char *port, int buf_size, char* path)
     {
         return ret;
     }
+
+    print_file_tree(&root);
 
     printf("Send root file metadata\n");
     memcpy(clientbuf, &root, sizeof(struct file_tree_st));

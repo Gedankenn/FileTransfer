@@ -12,7 +12,7 @@ enum file_transfer_errors
     CANT_CONNECT = -4
 };
 
-int receive_data(int sfd, char* data);
+int receive_data(int sfd, char* data, int buf_size);
 int transfer_data(int sfd, unsigned char* data, int data_size);
 
 #endif

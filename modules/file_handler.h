@@ -50,5 +50,8 @@ int read_dir(char *path, struct file_tree_st* root);
 int get_file_bin(struct file_st* file, unsigned char* bin_file);
 bool create_dir(char* path);
 bool create_file(char* path);
+void print_total_size(int size);
+void print_files(struct file_st *f);
+void print_file_tree(struct file_tree_st *root);
 
 #endif //__FILE_HANDLER_H__

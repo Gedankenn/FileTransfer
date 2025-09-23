@@ -1,5 +1,4 @@
 #include "file_handler.h"
-#include "msocket.h"
 #include "utils.h"
 #include <dirent.h>
 #include <stdio.h>
@@ -26,7 +25,7 @@ void menu(char *argv[])
     if (strcmp(argv[1], "-s") == 0)
     {
         printf("Entering server mode\n");
-        ret = server(argv[2], BUF, argv[3]);
+        ret = server(argv[2], 4095, argv[3]);
         if (ret == ERROR)
         {
             printf("Deu ruim \n");
@@ -35,7 +34,7 @@ void menu(char *argv[])
     else if (strcmp(argv[1], "-c") == 0)
     {
         printf("Entering client mode\n");
-        ret = client(argv[2], argv[3], BUF);
+        ret = client(argv[2], argv[3], 4095);
         if (ret == ERROR)
         {
             printf("Deu ruim \n");
