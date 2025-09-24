@@ -2,6 +2,7 @@
 #include "file_handler.h"
 #include "file_transfer_protocol.h"
 #include "msocket.h"
+#include "color.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -18,7 +19,7 @@ int server(char *port, int buf_size, char* path)
     sfd = create_socket(port);
     if(sfd < 0)
     {
-        printf("Error connecting to socket\n");
+        printf("%sError connecting to socket\n%s", ANSI_RED, ANSI_RESET);
         return 1;
     }
     
@@ -35,16 +36,16 @@ int server(char *port, int buf_size, char* path)
 
     print_file_tree(&root);
 
-    printf("Send root file metadata\n");
+    printf("%sSend root file metadata\n%s", ANSI_GREEN, ANSI_RESET);
     memcpy(clientbuf, &root, sizeof(struct file_tree_st));
     ret = socket_write(sfd, clientbuf, sizeof(struct file_tree_st));
     if (ret < 0)
     {
-        printf("Error sending root file metadata\n");
+        printf("%sError sending root file metadata\n%s",ANSI_RED, ANSI_RESET);
         return ERROR;
     }
 
-    printf("Start sending data\n");
+    printf("%sStart sending data\n%s",ANSI_GREEN, ANSI_RESET);
     pfile = root.root;
     int data_sent = 0;
     while(data_sent < root.total_size)
@@ -54,14 +55,14 @@ int server(char *port, int buf_size, char* path)
             ret = get_file_bin(pfile, databuf);
             if (ret != 0)
             {
-                printf("Error getting the file binary\n");
+                printf("%sError getting the file binary\n%s",ANSI_RED, ANSI_RESET);
                 return ERROR;
             }
         }
         ret = transfer_data(sfd, databuf, pfile->size);
         if (ret < 0)
         {
-            printf("Error sending the data\n");
+            printf("%sError sending the data\n%s",ANSI_RED, ANSI_RESET);
             return ERROR;
         }
         data_sent += ret;

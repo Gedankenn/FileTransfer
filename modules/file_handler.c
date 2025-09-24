@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "file_handler.h"
+#include "color.h"
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -82,6 +83,7 @@ void print_total_size(int size)
 
 void print_file_tree(struct file_tree_st *root)
 {
+    printf("%s",ANSI_YELLOW);
     printf("------------------ Print file tree  -----------------\n");
     printf("---------- File MetaData ----------\n");
     printf("Path: %s\n", root->root->path);
@@ -92,6 +94,7 @@ void print_file_tree(struct file_tree_st *root)
 
     print_files(root->root);
     printf("-----------------------------------------------------\n");
+    printf("%s",ANSI_RESET);
 }
 
 int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree_st *root)
