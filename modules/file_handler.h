@@ -53,5 +53,6 @@ bool create_file(char* path);
 void print_total_size(int size);
 void print_files(struct file_st *f);
 void print_file_tree(struct file_tree_st *root);
+void print_metadata(struct file_tree_st* root);
 
 #endif //__FILE_HANDLER_H__

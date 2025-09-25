@@ -81,17 +81,23 @@ void print_total_size(int size)
     }
 }
 
+void print_metadata(struct file_tree_st* root)
+{
+    printf("%s------------------ root file metadata -------------------\n",ANSI_MAGENTA);
+    if(root->root != NULL)
+    {
+        printf("Path: %s\n", root->root->path);
+    }
+    print_total_size(root->total_size);
+    printf("Files count: %d\n", root->files_count);
+    printf("Folders count: %d\n", root->folders_count);
+    printf("----------------------------------------------------------\n%s", ANSI_RESET);
+}
+
 void print_file_tree(struct file_tree_st *root)
 {
     printf("%s",ANSI_YELLOW);
-    printf("------------------ Print file tree  -----------------\n");
-    printf("---------- File MetaData ----------\n");
-    printf("Path: %s\n", root->root->path);
-    print_total_size(root->total_size);
-    printf("Total File count: %d\n", root->files_count);
-    printf("Total folder count: %d\n", root->folders_count);
-    printf("-----------------------------------\n");
-
+    print_metadata(root);
     print_files(root->root);
     printf("-----------------------------------------------------\n");
     printf("%s",ANSI_RESET);

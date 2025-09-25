@@ -38,12 +38,9 @@ int client(char* host, char* port, int buf_size)
 	    return ERROR;
 	}
 	memcpy(&root, buf, sizeof(struct file_tree_st));
+    root.root = NULL;
 
-    printf("%s--------------- received root file metadata -------------------\n",ANSI_MAGENTA);
-    print_total_size(root.total_size);
-    printf("Files count: %d\n", root.files_count);
-    printf("Folders count: %d\n", root.folders_count);
-    printf("----------------------------------------------------------\n%s", ANSI_RESET);
+    print_metadata(&root);
 
 	int received_data_size = 0;
 	while(received_data_size < root.total_size)

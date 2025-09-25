@@ -58,14 +58,14 @@ int server(char *port, int buf_size, char* path)
                 printf("%sError getting the file binary\n%s",ANSI_RED, ANSI_RESET);
                 return ERROR;
             }
+            ret = transfer_data(sfd, databuf, pfile->size);
+            if (ret < 0)
+            {
+                printf("%sError sending the data\n%s",ANSI_RED, ANSI_RESET);
+                return ERROR;
+            }
+            data_sent += ret;
         }
-        ret = transfer_data(sfd, databuf, pfile->size);
-        if (ret < 0)
-        {
-            printf("%sError sending the data\n%s",ANSI_RED, ANSI_RESET);
-            return ERROR;
-        }
-        data_sent += ret;
 
     }
 
