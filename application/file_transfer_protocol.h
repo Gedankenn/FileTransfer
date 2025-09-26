@@ -7,9 +7,10 @@ enum file_transfer_errors
 {
     OK = 0,
     WRONG_SIZE = -1,
-    CANT_CREATE_DIR = -2,
-    CANT_CREATE_FILE = -3,
-    CANT_CONNECT = -4
+    ERROR_WRITE_TO_SOCKET = -2,
+    CANT_CREATE_DIR = -3,
+    CANT_CREATE_FILE = -4,
+    CANT_CONNECT = -5
 };
 
 int receive_data(int sfd, char* data, int buf_size);

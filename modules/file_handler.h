@@ -5,9 +5,11 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#define PATH_SEP '/'
 #else
 #include <dirent.h>
 #include <sys/stat.h>
+#define PATH_SEP '\\'
 #endif
 
 #define FILE_PATH_SIZE 1024
@@ -18,6 +20,7 @@ enum
     SUCCESS = 0,
     ERROR = -1,
     NO_FILE_FOUND = -2,
+    PATH_ERROR = -3,
 };
 
 typedef enum
@@ -34,6 +37,7 @@ struct file_st
     file_type_e type;
     char name[FILE_NAME_SIZE];
     char path[FILE_PATH_SIZE];
+    char re_path[FILE_PATH_SIZE];
     int depth;
     int size;
 };

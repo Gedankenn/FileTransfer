@@ -81,6 +81,48 @@ void print_total_size(int size)
     }
 }
 
+void get_file_name_from_path(char* path, char* file_name)
+{
+    char c;
+    c = path[0];
+    int pos = 0;
+    int p_pos = 0;
+    int len = strlen(path);
+    while (p_pos <= len)
+    {
+        if (c == '/')
+        {
+            pos = 0;
+        }
+        else 
+        {
+            file_name[pos++] = c;
+        }
+        c = path[p_pos++];
+    }
+    file_name[pos] = '\0';
+}
+
+void get_relative_path(char* path, char* relative_path, char* root_folder)
+{
+    int root_len = strlen(root_folder);
+    char aux[FILE_PATH_SIZE];
+    int pos = 0;
+    int pos2 = 0;
+
+    while (strcmp(aux, root_folder) != 0)
+    {
+        pos = 0;
+        while (path[pos2] != PATH_SEP)
+        {
+            aux[pos++] = path[pos2++];
+        }
+        pos2++;
+        aux[pos] = '\0';
+    }
+
+}
+
 void print_metadata(struct file_tree_st* root)
 {
     printf("%s------------------ root file metadata -------------------\n",ANSI_MAGENTA);
@@ -107,12 +149,23 @@ int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree
 {
     struct dirent *entry;
     DIR *dp = opendir(path);
+    char root_folder[FILE_NAME_SIZE];
+    char relative_path[FILE_PATH_SIZE];
 
     if (dp == NULL) 
     {
         perror("opendir");
         return ERROR;
     }
+    if (strcmp(path, ".") == 0)
+    {
+        return PATH_ERROR;
+    }
+    else // Get the root path folder name  
+    {
+        get_file_name_from_path((char*)path, root_folder);
+    }
+    snprintf(relative_path, FILE_PATH_SIZE, "%s%c", root_folder, PATH_SEP);
 
     while ((entry = readdir(dp)))
     {
@@ -135,9 +188,10 @@ int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree
 		q = malloc(sizeof(struct file_st));
 		init_file_node(q);
         char fullpath[1024];
-        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entry->d_name);
+        snprintf(fullpath, sizeof(fullpath), "%s%c%s", path, PATH_SEP, entry->d_name);
         snprintf(q->path, FILE_PATH_SIZE, "%s", fullpath);
         snprintf(q->name, FILE_NAME_SIZE, "%s", entry->d_name);
+        snprintf(q->re_path, FILE_PATH_SIZE, "%s", relative_path);
 
 
         struct stat statbuf;
@@ -180,28 +234,6 @@ int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree
 
     closedir(dp);
     return SUCCESS;
-}
-
-void get_file_name_from_path(char* path, char* file_name)
-{
-    char c;
-    c = path[0];
-    int pos = 0;
-    int p_pos = 0;
-    int len = strlen(path);
-    while (p_pos <= len)
-    {
-        if (c == '/')
-        {
-            pos = 0;
-        }
-        else 
-        {
-            file_name[pos++] = c;
-        }
-        c = path[p_pos++];
-    }
-    file_name[pos] = '\0';
 }
 
 int get_file_bin(struct file_st* file, unsigned char* bin_file)

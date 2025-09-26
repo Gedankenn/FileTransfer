@@ -20,7 +20,7 @@ int server(char *port, int buf_size, char* path)
     if(sfd < 0)
     {
         printf("%sError connecting to socket\n%s", ANSI_RED, ANSI_RESET);
-        return 1;
+        return ERROR;
     }
     
     unsigned char* databuf = NULL;
@@ -29,6 +29,11 @@ int server(char *port, int buf_size, char* path)
     struct file_st* pfile = NULL;
 
     ret = read_dir(path, &root);
+    if (ret == PATH_ERROR)
+    {
+        printf("%sWrong file path passed as parameter\n%s",ANSI_RED, ANSI_RESET);
+        return ret;
+    }
     if (ret < 0)
     {
         return ret;
@@ -47,9 +52,21 @@ int server(char *port, int buf_size, char* path)
 
     printf("%sStart sending data\n%s",ANSI_GREEN, ANSI_RESET);
     pfile = root.root;
+    if(pfile == NULL)
+    {
+        printf("%sError in data pointer pfile\n%s",ANSI_RED, ANSI_RESET);
+        return ERROR;
+    }
     int data_sent = 0;
     while(data_sent < root.total_size)
     {
+        memcpy(clientbuf, pfile, sizeof(struct file_st));
+        ret = socket_write(sfd, clientbuf, sizeof(struct file_st));
+        if (ret < 0)
+        {
+            printf("%sError sending file metadata\n%s",ANSI_RED, ANSI_RESET);
+            return ERROR;
+        }
         if (pfile->type == FILE_E)
         {
             ret = get_file_bin(pfile, databuf);
@@ -61,12 +78,11 @@ int server(char *port, int buf_size, char* path)
             ret = transfer_data(sfd, databuf, pfile->size);
             if (ret < 0)
             {
-                printf("%sError sending the data\n%s",ANSI_RED, ANSI_RESET);
+                printf("%sError sending the file data\n%s",ANSI_RED, ANSI_RESET);
                 return ERROR;
             }
             data_sent += ret;
         }
-
     }
 
     return SUCCESS;

@@ -3,6 +3,7 @@
 #include "file_handler.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 int receive_data_part(int sfd, char* buf, int buf_size)
 {
@@ -20,7 +21,7 @@ int receive_data(int sfd, char* data, int buf_size)
 {
     int nread = 0;
     struct file_st file;
-    char buf[BUF];
+    char buf[buf_size];
     //first receive the data metada
     nread = socket_read(sfd, buf, buf_size);
     if (nread < 0)
@@ -31,6 +32,7 @@ int receive_data(int sfd, char* data, int buf_size)
     int data_received = 0;
     if(file.type == DIRECTORY_E)
     {
+        printf("Its a directory: %s\n",file.path);
         if (create_dir(file.path) == false)
         {
             return CANT_CREATE_DIR;
@@ -75,11 +77,11 @@ int transfer_data(int sfd, unsigned char* data, int data_size)
         }
         else 
         {
-            socket_write(sfd, data+data_sent, remain);
+            nwrite = socket_write(sfd, data+data_sent, remain);
         }
         if (nwrite < 0)
         {
-            return WRONG_SIZE;
+            return ERROR_WRITE_TO_SOCKET;
         }
         data_sent += nwrite;
     }
