@@ -32,7 +32,7 @@ int receive_data(int sfd, char* data, int buf_size)
     int data_received = 0;
     if(file.type == DIRECTORY_E)
     {
-        printf("Its a directory: %s\n",file.path);
+        printf("directory: %s\n",file.path);
         if (create_dir(file.path) == false)
         {
             return CANT_CREATE_DIR;
@@ -46,7 +46,7 @@ int receive_data(int sfd, char* data, int buf_size)
         nread = receive_data_part(sfd, buf, buf_size);
         if(nread < 0)
         {
-            return CANT_CONNECT;
+            return CANT_RECEIVE_BIN_DATA;
         }
         data_received += nread;
         memcpy(data+data_received, buf, nread);

@@ -105,7 +105,6 @@ void get_file_name_from_path(char* path, char* file_name)
 
 void get_relative_path(char* path, char* relative_path, char* root_folder)
 {
-    int root_len = strlen(root_folder);
     char aux[FILE_PATH_SIZE];
     int pos = 0;
     int pos2 = 0;
@@ -120,7 +119,7 @@ void get_relative_path(char* path, char* relative_path, char* root_folder)
         pos2++;
         aux[pos] = '\0';
     }
-
+    strcpy(relative_path, &path[pos2]);
 }
 
 void print_metadata(struct file_tree_st* root)
