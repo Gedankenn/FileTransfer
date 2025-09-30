@@ -108,8 +108,9 @@ void get_relative_path(char* path, char* relative_path, char* root_folder)
     char aux[FILE_PATH_SIZE];
     int pos = 0;
     int pos2 = 0;
+    int path_len = strlen(path);
 
-    while (strcmp(aux, root_folder) != 0)
+    while (strcmp(aux, root_folder) != 0 && pos2 < path_len)
     {
         pos = 0;
         while (path[pos2] != PATH_SEP)
@@ -119,7 +120,7 @@ void get_relative_path(char* path, char* relative_path, char* root_folder)
         pos2++;
         aux[pos] = '\0';
     }
-    strcpy(relative_path, &path[pos2]);
+    snprintf(relative_path, FILE_PATH_SIZE, "%s", &path[pos2-pos]);
 }
 
 void print_metadata(struct file_tree_st* root)

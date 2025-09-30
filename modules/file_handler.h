@@ -58,5 +58,7 @@ void print_total_size(int size);
 void print_files(struct file_st *f);
 void print_file_tree(struct file_tree_st *root);
 void print_metadata(struct file_tree_st* root);
+void get_relative_path(char* path, char* relative_path, char* root_folder);
+void get_file_name_from_path(char* path, char* file_name);
 
 #endif //__FILE_HANDLER_H__

@@ -12,7 +12,7 @@ int receive_data_part(int sfd, char* buf, int buf_size)
     nread = socket_read(sfd, buf, buf_size);
     if (nread < 0)
     {
-        return CANT_CONNECT;
+        return CANT_RECEIVE_BIN_DATA;
     }
     return nread;
 }
