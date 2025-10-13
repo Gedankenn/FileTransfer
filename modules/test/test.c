@@ -10,12 +10,13 @@ void test_get_relative_path(void)
 
     snprintf(path, FILE_PATH_SIZE, "/home/sabo/github/test");
     get_file_name_from_path(path, root_folder);
+    printf("file name: %s\n", root_folder);
 
     get_relative_path(path, relative_path, root_folder);
 
-    printf("path: %s\n",path);
-    printf("root_folder: %s\n",root_folder);
-    printf("relative path: %s\n",relative_path);
+    printf("path: %s\n", path);
+    printf("root_folder: %s\n", root_folder);
+    printf("relative path: %s\n", relative_path);
 
 }
 

@@ -61,11 +61,10 @@ int server(char *port, int buf_size, char* path)
     int sfd;
     int ret = 0;
 
-#ifdef DEBUG
     printf("--------------- Initialized server side ------------------\n");
-    printf("Host: %s",port);
+    printf("Port: %s\n",port);
     printf("----------------------------------------------------------\n");
-#endif
+    
     sfd = create_socket(port);
     if(sfd < 0)
     {

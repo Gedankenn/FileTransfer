@@ -84,12 +84,12 @@ void print_total_size(int size)
 void get_file_name_from_path(char* path, char* file_name)
 {
     char c;
-    c = path[0];
     int pos = 0;
     int p_pos = 0;
     int len = strlen(path);
     while (p_pos <= len)
     {
+        c = path[p_pos++];
         if (c == '/')
         {
             pos = 0;
@@ -98,7 +98,6 @@ void get_file_name_from_path(char* path, char* file_name)
         {
             file_name[pos++] = c;
         }
-        c = path[p_pos++];
     }
     file_name[pos] = '\0';
 }
@@ -106,21 +105,29 @@ void get_file_name_from_path(char* path, char* file_name)
 void get_relative_path(char* path, char* relative_path, char* root_folder)
 {
     char aux[FILE_PATH_SIZE];
+    aux[0] = '\0';
     int pos = 0;
     int pos2 = 0;
     int path_len = strlen(path);
+    printf("path len: %d\n", path_len);
+    printf("path: %s\n", path);
 
     while (strcmp(aux, root_folder) != 0 && pos2 < path_len)
     {
         pos = 0;
-        while (path[pos2] != PATH_SEP)
+        while (path[pos2] != PATH_SEP && pos2 < path_len)
         {
-            aux[pos++] = path[pos2++];
+            aux[pos] = path[pos2];
+            pos++;
+            pos2++;
         }
-        pos2++;
         aux[pos] = '\0';
+        printf("aux: %s\n",aux);
+        pos2++;
     }
-    snprintf(relative_path, FILE_PATH_SIZE, "%s", &path[pos2-pos]);
+    printf("found: %s\n",aux);
+    printf("pos2: %d, pos: %d, pos2-pos-1: %d\n",pos2, pos, pos2-pos-1);
+    snprintf(relative_path, FILE_PATH_SIZE, "%s", &path[pos2-pos-1]);
 }
 
 void print_metadata(struct file_tree_st* root)
@@ -142,15 +149,13 @@ void print_file_tree(struct file_tree_st *root)
     print_metadata(root);
     print_files(root->root);
     printf("-----------------------------------------------------\n");
-    printf("%s",ANSI_RESET);
+    printf("%s\n",ANSI_RESET);
 }
 
-int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree_st *root)
+int scan_dir(const char *path, const char* relative_path, int depth, struct file_st *file, struct file_tree_st *root)
 {
     struct dirent *entry;
     DIR *dp = opendir(path);
-    char root_folder[FILE_NAME_SIZE];
-    char relative_path[FILE_PATH_SIZE];
 
     if (dp == NULL) 
     {
@@ -161,11 +166,6 @@ int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree
     {
         return PATH_ERROR;
     }
-    else // Get the root path folder name  
-    {
-        get_file_name_from_path((char*)path, root_folder);
-    }
-    snprintf(relative_path, FILE_PATH_SIZE, "%s%c", root_folder, PATH_SEP);
 
     while ((entry = readdir(dp)))
     {
@@ -175,14 +175,12 @@ int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree
             continue;
         }
 
-        #ifdef DEBUG
         // Indentation for hierarchy
         for (int i = 0; i < depth; i++)
         {
             printf("    ");
         }
         printf("|---- %s\n", entry->d_name);
-        #endif
         // Build new path
 		struct file_st *q;
 		q = malloc(sizeof(struct file_st));
@@ -222,7 +220,7 @@ int scan_dir(const char *path, int depth, struct file_st *file, struct file_tree
         if (S_ISDIR(statbuf.st_mode))
         {
             root->folders_count++;
-            scan_dir(fullpath, depth + 1, q, root);
+            scan_dir(fullpath, relative_path, depth + 1, q, root);
         }
         else
         {
@@ -336,8 +334,9 @@ int read_dir(char *path, struct file_tree_st* root)
 
     snprintf(root->root->path, FILE_PATH_SIZE, "%s", path);
     snprintf(root->root->name, FILE_NAME_SIZE, "%s", file_name);
+    snprintf(root->root->re_path, FILE_PATH_SIZE, "%s", file_name);
     init_file_node(root->root);
-    ret = scan_dir(path, 1, root->root, root);
+    ret = scan_dir(path, file_name, 1, root->root, root);
 
 #ifdef DEBUG
     print_file_tree(root);

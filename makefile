@@ -96,6 +96,14 @@ testfile:
 runtest: test
 	@./$(TEST_BIN)
 
+server:
+	@$(MAKE) BUILD=release app
+	@./$(APPLICATION_BIN) -s 1337 /home/sabo/Downloads
+
+client:
+	@$(MAKE) BUILD=release app
+	@./$(APPLICATION_BIN) -c 127.0.0.1 1337 /home/sabo/Downloads
+
 # Cleanup
 clean:
 	rm -rf $(OUTPUT_DIR) .build

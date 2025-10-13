@@ -5,11 +5,11 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#define PATH_SEP '/'
+#define PATH_SEP '\\'
 #else
 #include <dirent.h>
 #include <sys/stat.h>
-#define PATH_SEP '\\'
+#define PATH_SEP '/'
 #endif
 
 #define FILE_PATH_SIZE 1024
