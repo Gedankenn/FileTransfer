@@ -18,6 +18,12 @@ void test_get_relative_path(void)
     printf("root_folder: %s\n", root_folder);
     printf("relative path: %s\n", relative_path);
 
+    snprintf(path, FILE_PATH_SIZE, "/home/sabo/github/test/test2");
+    get_relative_path(path, relative_path, root_folder);
+    printf("path: %s\n", path);
+    printf("root_folder: %s\n", root_folder);
+    printf("relative path: %s\n", relative_path);
+
 }
 
 int main(void)

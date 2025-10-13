@@ -102,7 +102,7 @@ void get_file_name_from_path(char* path, char* file_name)
     file_name[pos] = '\0';
 }
 
-void get_relative_path(char* path, char* relative_path, char* root_folder)
+void get_relative_path(const char* path, const char* relative_path, char* root_folder)
 {
     char aux[FILE_PATH_SIZE];
     aux[0] = '\0';
@@ -122,7 +122,7 @@ void get_relative_path(char* path, char* relative_path, char* root_folder)
         aux[pos] = '\0';
         pos2++;
     }
-    snprintf(relative_path, FILE_PATH_SIZE, "%s", &path[pos2-pos-1]);
+    snprintf((char*)relative_path, FILE_PATH_SIZE, "%s", &path[pos2-pos-1]);
 }
 
 void print_metadata(struct file_tree_st* root)
@@ -181,6 +181,7 @@ int scan_dir(const char *path, const char* relative_path, int depth, struct file
 		q = malloc(sizeof(struct file_st));
 		init_file_node(q);
         char fullpath[1024];
+        get_relative_path(path, relative_path, root->root->name);
         snprintf(fullpath, sizeof(fullpath), "%s%c%s", path, PATH_SEP, entry->d_name);
         snprintf(q->path, FILE_PATH_SIZE, "%s", fullpath);
         snprintf(q->name, FILE_NAME_SIZE, "%s", entry->d_name);
