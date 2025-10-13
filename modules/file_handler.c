@@ -109,8 +109,6 @@ void get_relative_path(char* path, char* relative_path, char* root_folder)
     int pos = 0;
     int pos2 = 0;
     int path_len = strlen(path);
-    printf("path len: %d\n", path_len);
-    printf("path: %s\n", path);
 
     while (strcmp(aux, root_folder) != 0 && pos2 < path_len)
     {
@@ -122,11 +120,8 @@ void get_relative_path(char* path, char* relative_path, char* root_folder)
             pos2++;
         }
         aux[pos] = '\0';
-        printf("aux: %s\n",aux);
         pos2++;
     }
-    printf("found: %s\n",aux);
-    printf("pos2: %d, pos: %d, pos2-pos-1: %d\n",pos2, pos, pos2-pos-1);
     snprintf(relative_path, FILE_PATH_SIZE, "%s", &path[pos2-pos-1]);
 }
 
