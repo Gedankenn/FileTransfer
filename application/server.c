@@ -22,18 +22,21 @@ int send_data(int sfd, struct file_st* pfile, int buf_size)
         return ret;
     }
     // if its file, send the file bin data
-    ret = get_file_bin(pfile, bin_file);
-    if (ret < 0)
+    if (pfile->type == FILE_E)
     {
-        printf("%sError getting file bin%s\n",ANSI_RED,ANSI_RESET);
-        return ret;
-    }
+        ret = get_file_bin(pfile, bin_file);
+        if (ret < 0)
+        {
+            printf("%sError getting file bin%s\n",ANSI_RED,ANSI_RESET);
+            return ret;
+        }
 
-    ret = transfer_data(sfd, bin_file, sizeof(bin_file));
-    if (ret < 0)
-    {
-        printf("%sError sending file bin data%s\n",ANSI_RED,ANSI_RESET);
-        return ret;
+        ret = transfer_data(sfd, bin_file, sizeof(bin_file));
+        if (ret < 0)
+        {
+            printf("%sError sending file bin data%s\n",ANSI_RED,ANSI_RESET);
+            return ret;
+        }
     }
     if (pfile->childrem)
     {
@@ -87,7 +90,7 @@ int server(char *port, int buf_size, char* path)
         return ret;
     }
 
-    print_file_tree(&root);
+    // print_file_tree(&root);
 
     printf("%sSend root file metadata\n%s", ANSI_GREEN, ANSI_RESET);
     memcpy(clientbuf, &root, sizeof(struct file_tree_st));
@@ -109,11 +112,17 @@ int server(char *port, int buf_size, char* path)
     while(data_sent < root.total_size)
     {
         data_sent = send_data(sfd, pfile, buf_size);
+        if (data_sent < 0)
+        {
+            printf("Error sending data\n");
+            return ERROR;
+        }
     }
 
     if (data_sent != root.total_size)
     {
         printf("%sWrong size sent%s\n", ANSI_RED, ANSI_RESET);
+        return ERROR;
     }
     return SUCCESS;
 }

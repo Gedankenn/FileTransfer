@@ -30,19 +30,22 @@ void print_files(struct file_st *f)
 
     // Print indentation
     int depth = f->depth;
-    for (int i = 0; i < depth; i++) {
+    for (int i = 0; i < depth && depth < 12; i++)
+    {
         printf("   ");
     }
 
     printf("|--- %s\n", f->name);
 
     // First: recurse into children
-    if (f->childrem) {
+    if (f->childrem)
+    {
         print_files(f->childrem);
     }
 
     // Then: move to next brother
-    if (f->brother) {
+    if (f->brother)
+    {
         print_files(f->brother);
     }
 	return;
@@ -140,89 +143,92 @@ void print_metadata(struct file_tree_st* root)
 
 void print_file_tree(struct file_tree_st *root)
 {
-    printf("%s",ANSI_YELLOW);
+    printf("%s\n",ANSI_YELLOW);
     print_metadata(root);
     print_files(root->root);
     printf("-----------------------------------------------------\n");
     printf("%s\n",ANSI_RESET);
 }
 
-int scan_dir(const char *path, const char* relative_path, int depth, struct file_st *file, struct file_tree_st *root)
+int scan_dir(const char *path, int depth, struct file_st *parent, struct file_tree_st *root)
 {
-    struct dirent *entry;
-    DIR *dp = opendir(path);
-
-    if (dp == NULL) 
-    {
-        perror("opendir");
-        return ERROR;
-    }
     if (strcmp(path, ".") == 0)
     {
         return PATH_ERROR;
     }
 
-    while ((entry = readdir(dp)))
+    DIR *dp = opendir(path);
+    if (!dp)
     {
-        // Skip "." and ".."
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0 || entry->d_name[0] == '.')
+        perror("opendir");
+        return ERROR;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(dp)) != NULL)
+    {
+        // Skip "." and ".." and hidden files
+        if (entry->d_name[0] == '.' )
         {
             continue;
         }
 
-        // Indentation for hierarchy
-        for (int i = 0; i < depth; i++)
+        // Build full path (avoid double '/')
+        char fullpath[PATH_MAX];
+        if (path[0] && path[strlen(path)-1] == PATH_SEP)
+            snprintf(fullpath, sizeof fullpath, "%s%s", path, entry->d_name);
+        else
+            snprintf(fullpath, sizeof fullpath, "%s%c%s", path, PATH_SEP, entry->d_name);
+
+        // Stat before allocating
+        struct stat st;
+        if (stat(fullpath, &st) != 0)
         {
-            printf("    ");
+            // could log perror("stat") here
+            continue;
         }
-        printf("|---- %s\n", entry->d_name);
-        // Build new path
-		struct file_st *q;
-		q = malloc(sizeof(struct file_st));
-		init_file_node(q);
-        char fullpath[1024];
-        get_relative_path(path, relative_path, root->root->name);
-        snprintf(fullpath, sizeof(fullpath), "%s%c%s", path, PATH_SEP, entry->d_name);
+
+        // Now allocate the node
+        struct file_st *q = malloc(sizeof *q);
+        if (!q) { closedir(dp); return ERROR; }
+        init_file_node(q);
+
+        // Fill fields
         snprintf(q->path, FILE_PATH_SIZE, "%s", fullpath);
         snprintf(q->name, FILE_NAME_SIZE, "%s", entry->d_name);
-        snprintf(q->re_path, FILE_PATH_SIZE, "%s", relative_path);
+        q->depth  = depth + 1;
+        q->parent = parent;
 
+        // Compute relative path of THIS entry against the tree root
+        // (don’t pass a shared buffer around)
+        get_relative_path(q->path, q->re_path, root->root->name);
 
-        struct stat statbuf;
-        if( stat(fullpath, &statbuf) != 0)
+        // Type & counters
+        if (S_ISDIR(st.st_mode))
         {
-            continue;
+            q->type = DIRECTORY_E;
+            root->folders_count++;
+        } else {
+            q->type = FILE_E;
+            q->size = st.st_size;
+            root->files_count++;
+            root->total_size += st.st_size; // count only files
         }
-        q->type = FILE_E;
-        q->depth = depth;
-        q->parent = file;
-        root->total_size += statbuf.st_size;
 
-        // attach q as child of file
-        if (file->childrem == NULL)
+        // Attach as last child of 'parent'
+        if (parent->childrem == NULL)
         {
-            file->childrem = q;
-        }
-        else
-        {
-            struct file_st *tmp = file->childrem;
-            while (tmp->brother != NULL) {
-                tmp = tmp->brother;
-            }
+            parent->childrem = q;
+        } else {
+            struct file_st *tmp = parent->childrem;
+            while (tmp->brother) tmp = tmp->brother;
             tmp->brother = q;
         }
 
-        // If it's a directory, recurse
-        if (S_ISDIR(statbuf.st_mode))
+        // Recurse into directories (do NOT reassign 'parent' for siblings)
+        if (S_ISDIR(st.st_mode))
         {
-            root->folders_count++;
-            scan_dir(fullpath, relative_path, depth + 1, q, root);
-        }
-        else
-        {
-            root->files_count++;
-            q->size = statbuf.st_size;
-            file = q;
+            scan_dir(fullpath, depth + 1, q, root);
         }
     }
 
@@ -234,21 +240,25 @@ int get_file_bin(struct file_st* file, unsigned char* bin_file)
 {
     FILE*  fp;
     int read_count = 0;
-
+    
     fp = fopen(file->path,"rb");
     if (fp == NULL)
     {
-        perror("Error opening file\n");
+        printf("%sError opening file\n%s", ANSI_RED, ANSI_RESET);
         return ERROR;
     }
     
     bin_file = (unsigned char*)malloc(file->size);
-    read_count = fread(bin_file,1,file->size, fp);
+    read_count = fread(bin_file,1,file->size - 1, fp);
     if(read_count != file->size)
     {
-        perror("Error reading file\n");
+        printf("%sError reading file\n%s", ANSI_RED, ANSI_RESET);
+        printf("File size: %d\nFile read: %d\n", file->size, read_count);
+        printf("File path: %s\n",file->path);
+        fclose(fp);
         return ERROR;
     }
+    fclose(fp);
     return SUCCESS;
 }
 
@@ -317,7 +327,6 @@ int read_dir(char *path, struct file_tree_st* root)
     root->files_count = 0;
     root->folders_count = 0;
     root->root = malloc(sizeof(struct file_st));
-    init_file_node(root->root);
     root->root->type = DIRECTORY_E;
     get_file_name_from_path(path, file_name);
 
@@ -331,11 +340,13 @@ int read_dir(char *path, struct file_tree_st* root)
     snprintf(root->root->path, FILE_PATH_SIZE, "%s", path);
     snprintf(root->root->name, FILE_NAME_SIZE, "%s", file_name);
     snprintf(root->root->re_path, FILE_PATH_SIZE, "%s", file_name);
+    root->root->depth = 0;
     init_file_node(root->root);
-    ret = scan_dir(path, file_name, 1, root->root, root);
+    ret = scan_dir(path, 1, root->root, root);
 
 #ifdef DEBUG
     print_file_tree(root);
 #endif
+    free(root->root);
     return ret;
 }

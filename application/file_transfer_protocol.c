@@ -24,8 +24,9 @@ int receive_data(int sfd, char* data, int buf_size)
     char buf[buf_size];
     //first receive the data metada
     nread = socket_read(sfd, buf, buf_size);
-    if (nread < 0)
+    if (nread <= 0)
     {
+        printf("Error receiving socket\n");
         return CANT_CONNECT;
     }
     memcpy(&file, buf, nread);
@@ -35,6 +36,7 @@ int receive_data(int sfd, char* data, int buf_size)
         printf("directory: %s\n",file.path);
         if (create_dir(file.path) == false)
         {
+            printf("Cant create path\n");
             return CANT_CREATE_DIR;
         }
         return 0;
