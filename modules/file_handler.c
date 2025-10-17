@@ -51,11 +51,12 @@ void print_files(struct file_st *f)
 	return;
 }
 
-void print_total_size(int size)
+void print_total_size(long int size)
 {
+    long unsigned int aux_size = size;
     int mul = 0;
-    int aux_size = size;
     int ret = 0;
+
     while(aux_size > 0)
     {
         ret = aux_size;
@@ -63,24 +64,30 @@ void print_total_size(int size)
         mul++;
     }
     mul -=1;
+    #ifdef DEBUG
+    printf("mul: %d\n", mul);
+    printf("total size in bytes: %li\n", size);
+    #endif
     printf("Total Size: ");
     switch (mul)
     {
-        case 0:
+        case BYTES:
             printf("%d b\n",ret);
             break;
-        case 1:
+        case KBYTES:
             printf("%d kb\n",ret);
             break;
-        case 2:
+        case MBYTES:
             printf("%d mb\n",ret);
             break;
-        case 3:
+        case GBYTES:
             printf("%d Gb\n",ret);
             break;
-        case 4:
+        case PBYTES:
             printf("%d Pb\n",ret);
             break;
+        default:
+            printf("Size calculation error\n");
     }
 }
 
@@ -208,11 +215,19 @@ int scan_dir(const char *path, int depth, struct file_st *parent, struct file_tr
         {
             q->type = DIRECTORY_E;
             root->folders_count++;
+            #ifdef DEBUG
+            printf("Is dir: %s\n", fullpath);
+            #endif
         } else {
             q->type = FILE_E;
             q->size = st.st_size;
             root->files_count++;
             root->total_size += st.st_size; // count only files
+            #ifdef DEBUG
+            printf("Is file: %s\n", fullpath);
+            printf("Size: %li\n", q->size);
+            printf("total size: %li\n", root->total_size);
+            #endif
         }
 
         // Attach as last child of 'parent'
@@ -253,7 +268,7 @@ int get_file_bin(struct file_st* file, unsigned char* bin_file)
     if(read_count != file->size)
     {
         printf("%sError reading file\n%s", ANSI_RED, ANSI_RESET);
-        printf("File size: %d\nFile read: %d\n", file->size, read_count);
+        printf("File size: %li\nFile read: %d\n", file->size, read_count);
         printf("File path: %s\n",file->path);
         fclose(fp);
         return ERROR;

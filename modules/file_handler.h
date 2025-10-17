@@ -39,13 +39,13 @@ struct file_st
     char path[FILE_PATH_SIZE];
     char re_path[FILE_PATH_SIZE];
     int depth;
-    int size;
+    long int size;
 };
 
 struct file_tree_st
 {
     struct file_st* root;
-    int total_size;
+    long  int total_size;
     int files_count;
     int folders_count;
 };
@@ -54,11 +54,20 @@ int read_dir(char *path, struct file_tree_st* root);
 int get_file_bin(struct file_st* file, unsigned char* bin_file);
 bool create_dir(char* path);
 bool create_file(char* path);
-void print_total_size(int size);
+void print_total_size(long int size);
 void print_files(struct file_st *f);
 void print_file_tree(struct file_tree_st *root);
 void print_metadata(struct file_tree_st* root);
 void get_file_name_from_path(char* path, char* file_name);
 void get_relative_path(const char* path, const char* relative_path, char* root_folder);
+
+
+enum{
+    BYTES = 0,
+    KBYTES,
+    MBYTES,
+    GBYTES,
+    PBYTES
+};
 
 #endif //__FILE_HANDLER_H__

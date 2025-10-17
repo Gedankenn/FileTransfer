@@ -97,11 +97,11 @@ runtest: test
 	@./$(TEST_BIN)
 
 server:
-	@$(MAKE) BUILD=release app
+	@$(MAKE) BUILD=debug app
 	@./$(APPLICATION_BIN) -s 1337 /home/sabo/Downloads
 
 client:
-	@$(MAKE) BUILD=release app
+	@$(MAKE) BUILD=debug app
 	@./$(APPLICATION_BIN) -c 127.0.0.1 1337 /home/sabo/Downloads
 
 # Cleanup
