@@ -216,6 +216,7 @@ int scan_dir(const char *path, int depth, struct file_st *parent, struct file_tr
             q->type = DIRECTORY_E;
             root->folders_count++;
             #ifdef DEBUG
+            printf("%s--------------------------------------------------------\n", ANSI_YELLOW);
             printf("Is dir: %s\n", fullpath);
             #endif
         } else {
@@ -224,9 +225,11 @@ int scan_dir(const char *path, int depth, struct file_st *parent, struct file_tr
             root->files_count++;
             root->total_size += st.st_size; // count only files
             #ifdef DEBUG
+            printf("%s--------------------------------------------------------\n", ANSI_YELLOW);
             printf("Is file: %s\n", fullpath);
             printf("Size: %li\n", q->size);
-            printf("total size: %li\n", root->total_size);
+            printf("file size: %li\n", root->total_size);
+            printf("%s\n", ANSI_RESET);
             #endif
         }
 
@@ -235,7 +238,8 @@ int scan_dir(const char *path, int depth, struct file_st *parent, struct file_tr
         {
             parent->childrem = q;
         } else {
-            struct file_st *tmp = parent->childrem;
+            struct file_st *tmp = malloc(sizeof(struct file_st));
+            tmp = parent->childrem;
             while (tmp->brother) tmp = tmp->brother;
             tmp->brother = q;
         }
@@ -254,7 +258,7 @@ int scan_dir(const char *path, int depth, struct file_st *parent, struct file_tr
 int get_file_bin(struct file_st* file, unsigned char* bin_file)
 {
     FILE*  fp;
-    int read_count = 0;
+    long int read_count = 0;
     
     fp = fopen(file->path,"rb");
     if (fp == NULL)
@@ -264,11 +268,11 @@ int get_file_bin(struct file_st* file, unsigned char* bin_file)
     }
     
     bin_file = (unsigned char*)malloc(file->size);
-    read_count = fread(bin_file,1,file->size - 1, fp);
+    read_count = fread(bin_file, sizeof(*bin_file),file->size, fp);
     if(read_count != file->size)
     {
         printf("%sError reading file\n%s", ANSI_RED, ANSI_RESET);
-        printf("File size: %li\nFile read: %d\n", file->size, read_count);
+        printf("File size: %li\nFile read: %li\n", file->size, read_count);
         printf("File path: %s\n",file->path);
         fclose(fp);
         return ERROR;
@@ -342,7 +346,7 @@ int read_dir(char *path, struct file_tree_st* root)
     root->files_count = 0;
     root->folders_count = 0;
     root->root = malloc(sizeof(struct file_st));
-    root->root->type = DIRECTORY_E;
+    init_file_node(root->root);
     get_file_name_from_path(path, file_name);
 
 #ifdef DEBUG
@@ -355,13 +359,26 @@ int read_dir(char *path, struct file_tree_st* root)
     snprintf(root->root->path, FILE_PATH_SIZE, "%s", path);
     snprintf(root->root->name, FILE_NAME_SIZE, "%s", file_name);
     snprintf(root->root->re_path, FILE_PATH_SIZE, "%s", file_name);
+
     root->root->depth = 0;
-    init_file_node(root->root);
-    ret = scan_dir(path, 1, root->root, root);
+    if (folderExist(path))
+    {
+        root->root->type = DIRECTORY_E;
+    }
+    else if (fileExist(path))
+    {
+        root->root->type = FILE_E;
+    }
+    else 
+    {
+        free(root->root);
+        printf("%s Folder or File does not exists%s\n", ANSI_RED, ANSI_RESET);
+        return ERROR;
+    }
+    ret = scan_dir(path, 0, root->root, root);
 
 #ifdef DEBUG
     print_file_tree(root);
 #endif
-    free(root->root);
     return ret;
 }

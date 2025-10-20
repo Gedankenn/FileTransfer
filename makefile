@@ -39,7 +39,7 @@ CFLAGS := $(BASE_CFLAGS)
 ifeq ($(BUILD),debug)
   CFLAGS += -g -O0 -DDEBUG
 else
-  CFLAGS += -O2
+  CFLAGS += -O0
 endif
 
 .PHONY: all debug release example clean help test runtest testapp testfile app
@@ -102,7 +102,7 @@ server:
 
 client:
 	@$(MAKE) BUILD=debug app
-	@./$(APPLICATION_BIN) -c 127.0.0.1 1337 /home/sabo/Downloads
+	@./$(APPLICATION_BIN) -c 127.0.0.1 1337 /tmp/
 
 # Cleanup
 clean:

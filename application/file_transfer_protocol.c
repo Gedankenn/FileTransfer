@@ -8,7 +8,6 @@
 int receive_data_part(int sfd, char* buf, int buf_size)
 {
     int nread = 0;
-
     nread = socket_read(sfd, buf, buf_size);
     if (nread < 0)
     {
@@ -23,6 +22,9 @@ int receive_data(int sfd, char* data, int buf_size)
     struct file_st file;
     char buf[buf_size];
     //first receive the data metada
+    #ifdef DEBUG
+    printf("Receive data\n");
+    #endif
     nread = socket_read(sfd, buf, buf_size);
     if (nread <= 0)
     {
@@ -30,7 +32,6 @@ int receive_data(int sfd, char* data, int buf_size)
         return CANT_CONNECT;
     }
     memcpy(&file, buf, nread);
-    int data_received = 0;
     if(file.type == DIRECTORY_E)
     {
         printf("directory: %s\n",file.path);
@@ -41,16 +42,25 @@ int receive_data(int sfd, char* data, int buf_size)
         }
         return 0;
     }
+    printf("file: %s\n",file.path);
+    printf("size: %li\n", file.size);
 
     data = malloc(file.size);
+    long int data_received = 0;
     while (data_received < file.size)
     {
         nread = receive_data_part(sfd, buf, buf_size);
-        if(nread < 0)
+        #ifdef DEBUG
+        printf("nread: %i\n", nread);
+        #endif
+        if(nread <= 0)
         {
             return CANT_RECEIVE_BIN_DATA;
         }
         data_received += nread;
+        #ifdef DEBUG
+        printf("data_received: %li\n", data_received);
+        #endif
         memcpy(data+data_received, buf, nread);
     }
     if( data_received != file.size)
@@ -59,16 +69,20 @@ int receive_data(int sfd, char* data, int buf_size)
     }
     if (!create_file(file.path))
     {
+        printf("Cant create file\n");
         return CANT_CREATE_FILE;
     } 
+    #ifdef DEBUG
+    printf("Received: %li\n",data_received);
+    #endif
     return data_received;
 }
 
-int transfer_data(int sfd, unsigned char* data, int data_size)
+int transfer_data(int sfd, unsigned char* data, long int data_size)
 {
     int nwrite = 0;
-    int data_sent = 0;
-    int remain = 0;
+    long int data_sent = 0;
+    long int remain = 0;
 
     while (data_sent < data_size)
     {
@@ -86,6 +100,9 @@ int transfer_data(int sfd, unsigned char* data, int data_size)
             return ERROR_WRITE_TO_SOCKET;
         }
         data_sent += nwrite;
+        #ifdef DEBUG
+        printf("sent %li of %li\n", data_sent, data_size);
+        #endif
     }
 
     if (data_sent != data_size)

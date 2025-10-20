@@ -15,6 +15,6 @@ enum file_transfer_errors
 };
 
 int receive_data(int sfd, char* data, int buf_size);
-int transfer_data(int sfd, unsigned char* data, int data_size);
+int transfer_data(int sfd, unsigned char* data, long int data_size);
 
 #endif

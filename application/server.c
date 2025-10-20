@@ -3,53 +3,99 @@
 #include "file_transfer_protocol.h"
 #include "msocket.h"
 #include "color.h"
+#include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 
+#define RETRYES 3
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-int send_data(int sfd, struct file_st* pfile, int buf_size)
+static long int send_data(int sfd, struct file_st* pfile, int buf_size, long int data_send)
 {
-    int ret = 0;
-    int data_send = 0;
+    long int ret = 0;
+    int retryes = 0;
     char buf[buf_size];
     unsigned char* bin_file = NULL;
     // First send the file metadata 
     memcpy(buf, pfile, sizeof(struct file_st));
+    #ifdef DEBUG
+    printf("%s---------------------------------------------------\n", ANSI_YELLOW);
+    printf("path: %s\n", pfile->path);
+    printf("re_path: %s\n", pfile->re_path);
+    if (pfile->type == FILE_E)
+    {
+        printf("type: FILE\n%s", ANSI_RESET);
+
+    }
+    else 
+    {
+        printf("type: Directory%s\n", ANSI_RESET);
+    }
+    #endif
     ret = socket_write(sfd, buf, sizeof(struct file_st));
     if (ret < 0)
     {
         printf("%sError sending file metadata%s\n",ANSI_RED,ANSI_RESET);
         return ret;
     }
-    // if its file, send the file bin data
-    if (pfile->type == FILE_E)
+    
+    if (pfile->type == DIRECTORY_E)
     {
-        ret = get_file_bin(pfile, bin_file);
-        if (ret < 0)
+        if (pfile->childrem)
         {
-            printf("%sError getting file bin%s\n",ANSI_RED,ANSI_RESET);
-            return ret;
+            ret = send_data(sfd, pfile->childrem, buf_size, data_send);
+            if (ret < 0)
+            {
+                return ret;
+            }
         }
 
-        ret = transfer_data(sfd, bin_file, sizeof(bin_file));
-        if (ret < 0)
+        if (pfile->brother)
         {
-            printf("%sError sending file bin data%s\n",ANSI_RED,ANSI_RESET);
-            return ret;
+            ret = send_data(sfd, pfile->brother, buf_size, data_send);
+            if (ret < 0)
+            {
+                return ret;
+            }
         }
+        data_send = data_send+ret;
+        return data_send;
     }
+
+    // if its file, send the file bin data
+    printf("Sending file: %s\n", pfile->re_path);
+    ret = get_file_bin(pfile, bin_file);
+    if (ret < 0)
+    {
+        printf("%sError getting file bin%s\n",ANSI_RED,ANSI_RESET);
+        return ret;
+    }
+    printf("file size: %li\n", pfile->size);
+
+    ret = -1;
+    while (retryes < RETRYES && ret < 0)
+    {
+        ret = transfer_data(sfd, bin_file, pfile->size);
+        retryes++;
+    }
+    if (ret < 0)
+    {
+        printf("%sError sending file bin data%s\n",ANSI_RED,ANSI_RESET);
+        return ret;
+    }
+
     if (pfile->childrem)
     {
-        ret = send_data(sfd, pfile->childrem, buf_size);
+        ret = send_data(sfd, pfile->childrem, buf_size, data_send);
         if (ret < 0)
         {
             return ret;
         }
     }
-    data_send = data_send + ret;
+
     if (pfile->brother)
     {
-        ret = send_data(sfd, pfile->brother, buf_size);
+        ret = send_data(sfd, pfile->brother, buf_size, data_send);
         if (ret < 0)
         {
             return ret;
@@ -89,8 +135,12 @@ int server(char *port, int buf_size, char* path)
     {
         return ret;
     }
+    #ifdef DEBUG
+    printf("%s ----------- SERVER DEBUG ----------------\n", ANSI_YELLOW);
+    print_file_tree(&root);
+    printf("root: %s:%d%s\n", root.root->path, root.root->type, ANSI_RESET);
+    #endif
 
-    // print_file_tree(&root);
 
     printf("%sSend root file metadata\n%s", ANSI_GREEN, ANSI_RESET);
     memcpy(clientbuf, &root, sizeof(struct file_tree_st));
@@ -108,15 +158,16 @@ int server(char *port, int buf_size, char* path)
         printf("%sError in data pointer pfile\n%s",ANSI_RED, ANSI_RESET);
         return ERROR;
     }
-    int data_sent = 0;
+    long int data_sent = 0;
     while(data_sent < root.total_size)
     {
-        data_sent = send_data(sfd, pfile, buf_size);
+        data_sent = send_data(sfd, pfile, buf_size, data_sent);
         if (data_sent < 0)
         {
             printf("Error sending data\n");
             return ERROR;
         }
+        printf("%sSent %li of %li%s\n", ANSI_GREEN, data_sent, root.total_size, ANSI_RESET);
     }
 
     if (data_sent != root.total_size)

@@ -51,6 +51,7 @@ int client(char* host, char* port, int buf_size)
             return ERROR;
         }
         received_data_size += nread;
+        printf("%sReceived %d of %li%s\n", ANSI_GREEN, received_data_size, root.total_size, ANSI_RESET);
     }
 
     return 0;
