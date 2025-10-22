@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "color.h"
 
 int receive_data_part(int sfd, char* buf, int buf_size)
 {
@@ -23,7 +24,7 @@ int receive_data(int sfd, char* data, int buf_size)
     char buf[buf_size];
     //first receive the data metada
     #ifdef DEBUG
-    printf("Receive data\n");
+    printf("%sReceive data%s\n", ANSI_YELLOW, ANSI_RESET);
     #endif
     nread = socket_read(sfd, buf, buf_size);
     if (nread <= 0)
@@ -34,8 +35,8 @@ int receive_data(int sfd, char* data, int buf_size)
     memcpy(&file, buf, nread);
     if(file.type == DIRECTORY_E)
     {
-        printf("directory: %s\n",file.path);
-        if (create_dir(file.path) == false)
+        printf("directory: %s\n",file.re_path);
+        if (create_dir(file.re_path) == false)
         {
             printf("Cant create path\n");
             return CANT_CREATE_DIR;
