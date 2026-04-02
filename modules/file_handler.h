@@ -29,38 +29,29 @@ typedef enum
     DIRECTORY_E
 }file_type_e;
 
-struct file_st
+typedef struct file_node
 {
-    struct file_st *parent;
-    struct file_st *childrem;
-    struct file_st *brother;
-    file_type_e type;
     char name[FILE_NAME_SIZE];
     char path[FILE_PATH_SIZE];
-    char re_path[FILE_PATH_SIZE];
-    int depth;
-    long int size;
-};
+
+    size_t size;
+
+    file_type_e type;
+
+    struct file_node *parent;
+
+    struct file_node *first_child;
+    struct file_node *next_sibling;
+
+} file_node_t;
 
 struct file_tree_st
 {
-    struct file_st* root;
+    struct file_note_t* root;
     long  int total_size;
     int files_count;
     int folders_count;
 };
-
-int read_dir(char *path, struct file_tree_st* root);
-int get_file_bin(struct file_st* file, unsigned char* bin_file);
-bool create_dir(char* path);
-bool create_file(char* path);
-void print_total_size(long int size);
-void print_files(struct file_st *f);
-void print_file_tree(struct file_tree_st *root);
-void print_metadata(struct file_tree_st* root);
-void get_file_name_from_path(char* path, char* file_name);
-void get_relative_path(const char* path, const char* relative_path, char* root_folder);
-
 
 enum{
     BYTES = 0,
