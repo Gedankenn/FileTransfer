@@ -28,11 +28,32 @@ without all the legacy baggage.
 
 ---
 
+## 🧩 How it's built
+
+- **C (C99), GCC, Make**, Linux sockets: the transport is plain **TCP over IPv4**, through my [`mysocket`](https://github.com/Gedankenn/mysocket) wrapper (git submodule in `modules/mysocket`).
+- `application/server.c` / `application/client.c`: server sends a directory tree, client receives it (default buffer: 4095 bytes).
+- `application/file_transfer_protocol.c`: packet framing for the custom protocol.
+- `modules/file_handler.c`: file/directory metadata and binary reads.
+- `modules/utils.c`: helpers, including finding the machine's IP (uses libcurl).
+- `modules/test/test.c`: test program (`make test` / `make runtest`).
+
 ## 🚀 Getting Started
 
-For the brave souls who want to test it:
+For the brave souls who want to test it (requires `gcc`, `make` and the libcurl development package):
 
 ```bash
-git clone https://github.com/Gedankenn/FileTransfer.git
+git clone --recurse-submodules https://github.com/Gedankenn/FileTransfer.git
 cd FileTransfer
-make help
+make help      # list targets (release, debug, test, runtest, testapp, testfile, clean)
+make           # build output/app
+```
+
+Usage, from `main.c`:
+
+```bash
+./output/app -s <port> <path>     # server mode: serve <path>
+./output/app -c <host> <port>     # client mode: connect and receive
+./output/app -f <dir>             # list files in a directory
+```
+
+> ⚠️ Heads-up: the current `main` is mid-refactor and does **not** compile yet. `application/` still references file-handler functions removed in the last refactor.
