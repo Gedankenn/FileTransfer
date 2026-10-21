@@ -22,7 +22,7 @@ without all the legacy baggage.
 
 - [x] Basic packet sending and receiving  
 - [x] File serialization and binary reads  
-- [/] Actually sending the files  <-- Im Here
+- [x] Actually sending the files (single file or a whole directory tree, verified with sha256)
 - [ ] Reliability layer (a.k.a "please don’t drop my packets")  
 - [ ] Documentation that actually explains things (this README doesn’t count)  
 
@@ -31,8 +31,8 @@ without all the legacy baggage.
 ## 🧩 How it's built
 
 - **C (C99), GCC, Make**, Linux sockets: the transport is plain **TCP over IPv4**, through my [`mysocket`](https://github.com/Gedankenn/mysocket) wrapper (git submodule in `modules/mysocket`).
-- `application/server.c` / `application/client.c`: server sends a directory tree, client receives it (default buffer: 4095 bytes).
-- `application/file_transfer_protocol.c`: packet framing for the custom protocol.
+- `application/server.c` / `application/client.c`: the server sends a file or a directory tree to one client and exits; the client writes it into a destination directory.
+- `application/file_transfer_protocol.c`: the wire format. A header (`FTP1`, entry count, total size) is followed by one entry per directory/file (type, relative path, size) and, for files, the content streamed in 64 KiB chunks. Integers are big-endian; paths with `..` or a leading `/` are rejected by the client.
 - `modules/file_handler.c`: file/directory metadata and binary reads.
 - `modules/utils.c`: helpers, including finding the machine's IP (uses libcurl).
 - `modules/test/test.c`: test program (`make test` / `make runtest`).
@@ -52,8 +52,15 @@ Usage, from `main.c`:
 
 ```bash
 ./output/app -s <port> <path>     # server mode: serve <path>
-./output/app -c <host> <port>     # client mode: connect and receive
+./output/app -c <host> <port> [dest]  # client mode: receive into dest (default: current dir)
 ./output/app -f <dir>             # list files in a directory
 ```
 
-> ⚠️ Heads-up: `make` builds `output/app`, but the directory transfer is still work in progress (a localhost server/client run currently fails while sending file data).
+Example on one machine:
+
+```bash
+./output/app -s 1337 ~/Documents/report.pdf      # or a directory
+./output/app -c 127.0.0.1 1337 /tmp/received     # in another terminal
+```
+
+The server serves one client per run. There is no encryption or authentication yet; use it only on a trusted network.
