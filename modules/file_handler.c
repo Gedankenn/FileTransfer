@@ -367,7 +367,18 @@ int read_dir(char *path, struct file_tree_st* root)
     }
     else if (fileExist(path))
     {
+        /* a single file: no directory to scan */
+        struct stat st;
+        if (stat(path, &st) != 0)
+        {
+            free(root->root);
+            return ERROR;
+        }
         root->root->type = FILE_E;
+        root->root->size = st.st_size;
+        root->files_count = 1;
+        root->total_size = st.st_size;
+        return SUCCESS;
     }
     else 
     {

@@ -5,23 +5,20 @@
 #include "color.h"
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
-#ifdef DEBUG
-#include <stdlib.h>
-#endif
-
-int client(char* host, char* port, int buf_size)
+int client(char* host, char* port, int buf_size, char* dest_dir)
 {
-    char buf[buf_size];
+    (void)buf_size;
     int sfd = 0;
-    int nread = 0;
-	struct file_tree_st root;
+    uint32_t entries = 0;
+    uint64_t total = 0;
 
-#ifdef DEBUG 
-    printf("--------------- Initialized client side ------------------\n");
-    printf("Host: %s:%s",host,port);
-    printf("----------------------------------------------------------\n");
-#endif
+    if (dest_dir == NULL)
+        dest_dir = ".";
+    if (!create_dir(dest_dir))
+        return ERROR;
+
     sfd = connect_socket(host, port);
     if(sfd < 0)
     {
@@ -29,31 +26,37 @@ int client(char* host, char* port, int buf_size)
         return ERROR;
     }
 
-	// Wait for root file metadata
     printf("%sWaiting for root file metadata\n%s",ANSI_GREEN, ANSI_RESET);
-	nread = socket_read(sfd, buf, buf_size);
-	if(nread < 0)
-	{
+    if (recv_header(sfd, &entries, &total) != OK)
+    {
         printf("%sDidnt received the root file metadata from the server\n%s",ANSI_RED, ANSI_RESET);
-	    return ERROR;
-	}
-	memcpy(&root, buf, sizeof(struct file_tree_st));
-    root.root = NULL;
+        close(sfd);
+        return ERROR;
+    }
+    printf("%sEntries: %u, total size: %llu bytes%s\n", ANSI_MAGENTA, entries,
+           (unsigned long long)total, ANSI_RESET);
 
-    print_metadata(&root);
-
-	int received_data_size = 0;
-	while(received_data_size < root.total_size)
-	{
-        nread = receive_data(sfd, buf, buf_size);
-        if (nread < 0)
+    unsigned long long received = 0;
+    for (uint32_t i = 0; i < entries; i++)
+    {
+        long long n = recv_entry(sfd, dest_dir);
+        if (n < 0)
         {
+            printf("%sTransfer failed (error %lld)%s\n", ANSI_RED, n, ANSI_RESET);
+            close(sfd);
             return ERROR;
         }
-        received_data_size += nread;
-        printf("%sReceived %d of %li%s\n", ANSI_GREEN, received_data_size, root.total_size, ANSI_RESET);
+        received += (unsigned long long)n;
+        printf("%sReceived %llu of %llu%s\n", ANSI_GREEN, received,
+               (unsigned long long)total, ANSI_RESET);
     }
+    close(sfd);
 
-    return 0;
+    if (received != total)
+    {
+        printf("%sWrong size received%s\n", ANSI_RED, ANSI_RESET);
+        return ERROR;
+    }
+    printf("%sTransfer finished into %s%s\n", ANSI_GREEN, dest_dir, ANSI_RESET);
+    return SUCCESS;
 }
-
