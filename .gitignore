@@ -1,3 +1,6 @@
 app
 *.d
 *.o
+
+# Test binary (built by make test)
+modules/test/test
