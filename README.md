@@ -56,4 +56,4 @@ Usage, from `main.c`:
 ./output/app -f <dir>             # list files in a directory
 ```
 
-> ⚠️ Heads-up: the current `main` is mid-refactor and does **not** compile yet. `application/` still references file-handler functions removed in the last refactor.
+> ⚠️ Heads-up: `make` builds `output/app`, but the directory transfer is still work in progress (a localhost server/client run currently fails while sending file data).
